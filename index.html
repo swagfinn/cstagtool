@@ -1,572 +1,565 @@
-{\rtf1\ansi\ansicpg950\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tag 指令生成器 · Allan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1020;
+    --surface:#141B2E;
+    --surface-2:#1A2338;
+    --line:#2A3550;
+    --line-soft:#212B44;
+    --text:#E6EAF2;
+    --muted:#8A94AD;
+    --muted-2:#5E687F;
+    --gold:#F5B94D;
+    --gold-dim:#3a3018;
+    --teal:#3FD68C;
+    --teal-dim:#14302a;
+    --red:#FF6B5B;
+    --red-dim:#331e20;
+    --violet:#8B7BF5;
+    --radius:14px;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+    --sans:'Noto Sans TC', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 82% -10%, rgba(139,123,245,.10), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, rgba(245,185,77,.06), transparent 55%),
+      var(--ink);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.55;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="zh-Hant">\
-<head>\
-<meta charset="UTF-8">\
-<meta name="viewport" content="width=device-width, initial-scale=1.0">\
-<title>Tag \uc0\u25351 \u20196 \u29983 \u25104 \u22120  \'b7 Allan</title>\
-<link rel="preconnect" href="https://fonts.googleapis.com">\
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">\
-<style>\
-  :root\{\
-    --ink:#0B1020;\
-    --surface:#141B2E;\
-    --surface-2:#1A2338;\
-    --line:#2A3550;\
-    --line-soft:#212B44;\
-    --text:#E6EAF2;\
-    --muted:#8A94AD;\
-    --muted-2:#5E687F;\
-    --gold:#F5B94D;\
-    --gold-dim:#3a3018;\
-    --teal:#3FD68C;\
-    --teal-dim:#14302a;\
-    --red:#FF6B5B;\
-    --red-dim:#331e20;\
-    --violet:#8B7BF5;\
-    --radius:14px;\
-    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;\
-    --sans:'Noto Sans TC', -apple-system, 'Segoe UI', system-ui, sans-serif;\
-  \}\
-  *\{box-sizing:border-box\}\
-  html,body\{margin:0;padding:0\}\
-  body\{\
-    background:\
-      radial-gradient(1200px 600px at 82% -10%, rgba(139,123,245,.10), transparent 60%),\
-      radial-gradient(900px 500px at -5% 110%, rgba(245,185,77,.06), transparent 55%),\
-      var(--ink);\
-    color:var(--text);\
-    font-family:var(--sans);\
-    line-height:1.55;\
-    min-height:100vh;\
-    -webkit-font-smoothing:antialiased;\
-  \}\
-  .wrap\{max-width:1180px;margin:0 auto;padding:28px 22px 60px\}\
-\
-  /* ---------- Header ---------- */\
-  header\{\
-    display:flex;align-items:flex-end;justify-content:space-between;\
-    gap:20px;flex-wrap:wrap;margin-bottom:22px;\
-    padding-bottom:18px;border-bottom:1px solid var(--line-soft);\
-  \}\
-  .brand\{display:flex;align-items:center;gap:14px\}\
-  .logo\{\
-    width:44px;height:44px;border-radius:12px;flex:0 0 auto;\
-    background:linear-gradient(145deg,#22304e,#141b2e);\
-    border:1px solid var(--line);\
-    display:grid;place-items:center;\
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);\
-  \}\
-  .logo svg\{width:22px;height:22px\}\
-  h1\{font-size:20px;font-weight:700;margin:0;letter-spacing:.2px\}\
-  .sub\{color:var(--muted);font-size:12.5px;margin-top:2px;letter-spacing:.3px\}\
-\
-  /* ---------- Mode toggle ---------- */\
-  .mode\{\
-    display:flex;background:var(--surface);border:1px solid var(--line);\
-    border-radius:999px;padding:4px;gap:2px;\
-  \}\
-  .mode button\{\
-    font-family:var(--sans);font-size:13px;font-weight:600;color:var(--muted);\
-    background:transparent;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;\
-    transition:.16s ease;display:flex;align-items:center;gap:7px;\
-  \}\
-  .mode button .dot\{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.6\}\
-  .mode button[aria-pressed="true"]\{color:var(--ink)\}\
-  .mode button.rm[aria-pressed="true"]\{background:var(--red);box-shadow:0 3px 14px rgba(255,107,91,.28)\}\
-  .mode button.add[aria-pressed="true"]\{background:var(--teal);box-shadow:0 3px 14px rgba(63,214,140,.25)\}\
-\
-  /* ---------- Grid ---------- */\
-  .grid\{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px\}\
-  @media(max-width:860px)\{.grid\{grid-template-columns:1fr\}\}\
-\
-  .panel\{\
-    background:linear-gradient(180deg,var(--surface),#121829);\
-    border:1px solid var(--line);border-radius:var(--radius);\
-    overflow:hidden;\
-  \}\
-  .panel-head\{\
-    display:flex;align-items:center;justify-content:space-between;gap:10px;\
-    padding:13px 16px;border-bottom:1px solid var(--line-soft);\
-  \}\
-  .panel-title\{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)\}\
-  .panel-title b\{color:var(--gold)\}\
-  .ghost\{\
-    font-family:var(--sans);font-size:12.5px;color:var(--muted);\
-    background:transparent;border:1px solid var(--line);border-radius:8px;\
-    padding:6px 11px;cursor:pointer;transition:.15s;\
-  \}\
-  .ghost:hover\{color:var(--text);border-color:var(--muted-2);background:var(--surface-2)\}\
-\
-  /* ---------- Input ---------- */\
-  textarea\{\
-    width:100%;min-height:360px;resize:vertical;display:block;\
-    background:transparent;border:0;color:var(--text);\
-    font-family:var(--mono);font-size:13.5px;line-height:1.7;\
-    padding:16px;outline:none;\
-  \}\
-  textarea::placeholder\{color:var(--muted-2)\}\
-  .input-foot\{\
-    display:flex;align-items:center;justify-content:space-between;gap:10px;\
-    padding:10px 14px;border-top:1px solid var(--line-soft);\
-    font-size:12px;color:var(--muted);\
-  \}\
-  .count b\{color:var(--text);font-family:var(--mono)\}\
-\
-  /* ---------- Results ---------- */\
-  .results\{padding:14px;display:flex;flex-direction:column;gap:14px;min-height:360px\}\
-  .empty\{\
-    margin:auto;text-align:center;color:var(--muted-2);padding:30px 16px;max-width:320px;\
-  \}\
-  .empty svg\{width:40px;height:40px;opacity:.5;margin-bottom:12px\}\
-  .empty p\{margin:6px 0;font-size:13.5px\}\
-\
-  .card\{\
-    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;\
-    padding:14px;position:relative;\
-    animation:pop .25s ease both;\
-  \}\
-  @keyframes pop\{from\{opacity:0;transform:translateY(6px)\}to\{opacity:1;transform:none\}\}\
-  .card-top\{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px\}\
-  .who\{display:flex;align-items:center;gap:9px;min-width:0\}\
-  .idx\{\
-    font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted);\
-    background:var(--ink);border:1px solid var(--line);border-radius:7px;\
-    padding:3px 7px;flex:0 0 auto;\
-  \}\
-  .name\{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis\}\
-  .name b\{color:var(--text);font-weight:600\}\
-\
-  .kv\{display:flex;align-items:center;gap:8px;margin-bottom:11px;font-size:12px\}\
-  .kv .k\{color:var(--muted-2);flex:0 0 auto\}\
-  .idpill\{\
-    font-family:var(--mono);font-size:12.5px;color:var(--text);\
-    background:var(--ink);border:1px solid var(--line);border-radius:8px;\
-    padding:5px 9px;letter-spacing:.4px;\
-  \}\
-  .ok-badge\{font-size:10.5px;color:var(--teal);border:1px solid var(--teal-dim);background:var(--teal-dim);border-radius:6px;padding:2px 6px;flex:0 0 auto\}\
-\
-  .chips\{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px\}\
-  .chip\{\
-    font-family:var(--mono);font-size:11.5px;font-weight:500;\
-    border-radius:7px;padding:4px 9px;display:inline-flex;align-items:center;gap:5px;\
-  \}\
-  .chip.banned\{color:var(--red);background:var(--red-dim);border:1px solid rgba(255,107,91,.28)\}\
-  .chip.tag\{color:var(--gold);background:var(--gold-dim);border:1px solid rgba(245,185,77,.3)\}\
-  .chip.fail\{color:var(--muted-2);background:transparent;border:1px dashed var(--muted-2);text-decoration:line-through\}\
-\
-  .cmd-row\{display:flex;align-items:stretch;gap:8px\}\
-  .cmd\{\
-    flex:1;min-width:0;\
-    font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--text);\
-    background:var(--ink);border:1px solid var(--line);border-radius:10px;\
-    padding:11px 12px;overflow-x:auto;white-space:pre;\
-  \}\
-  .cmd .op\{color:var(--red)\}\
-  .cmd.add-mode .op\{color:var(--teal)\}\
-  .cmd .slash\{color:var(--muted-2)\}\
-  .cmd .id\{color:var(--violet)\}\
-  .cmd .at\{color:var(--gold)\}\
-  .copy\{\
-    flex:0 0 auto;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;\
-    color:var(--ink);background:var(--gold);border:0;border-radius:10px;padding:0 15px;\
-    display:flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap;\
-  \}\
-  .copy:hover\{filter:brightness(1.06)\}\
-  .copy.done\{background:var(--teal)\}\
-  .copy svg\{width:14px;height:14px\}\
-\
-  .warn\{\
-    margin-top:10px;font-size:12px;color:var(--gold);\
-    display:flex;align-items:flex-start;gap:7px;\
-    background:rgba(245,185,77,.07);border:1px solid rgba(245,185,77,.2);\
-    border-radius:8px;padding:8px 10px;\
-  \}\
-  .warn svg\{width:14px;height:14px;flex:0 0 auto;margin-top:2px\}\
-\
-  .bar\{\
-    display:flex;align-items:center;justify-content:space-between;gap:10px;\
-    padding:6px 2px 2px;\
-  \}\
-  .bar .n\{font-size:12px;color:var(--muted)\}\
-  .bar .n b\{color:var(--gold);font-family:var(--mono)\}\
-  .copyall\{\
-    font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;\
-    color:var(--text);background:var(--surface-2);border:1px solid var(--line);\
-    border-radius:9px;padding:8px 14px;display:flex;align-items:center;gap:7px;transition:.15s;\
-  \}\
-  .copyall:hover\{border-color:var(--gold);color:var(--gold)\}\
-  .copyall.done\{border-color:var(--teal);color:var(--teal)\}\
-\
-  /* ---------- Reference links ---------- */\
-  .refs\{margin-top:24px\}\
-  .refs-head\{display:flex;align-items:center;gap:9px;margin-bottom:12px\}\
-  .refs-head .line\{height:1px;background:var(--line-soft);flex:1\}\
-  .refs-head span\{font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)\}\
-  .ref-grid\{display:grid;grid-template-columns:repeat(3,1fr);gap:12px\}\
-  @media(max-width:860px)\{.ref-grid\{grid-template-columns:1fr\}\}\
-  .ref\{\
-    background:var(--surface);border:1px solid var(--line);border-radius:12px;\
-    padding:15px 16px;display:flex;flex-direction:column;gap:8px;transition:.15s;\
-    text-decoration:none;color:inherit;cursor:pointer;position:relative;\
-  \}\
-  .ref:hover\{border-color:var(--violet);transform:translateY(-2px);background:var(--surface-2)\}\
-  .ref:focus-visible\{outline:2px solid var(--violet);outline-offset:2px\}\
-  .ref .rt\{font-size:13px;font-weight:600;color:var(--text);line-height:1.45;padding-right:22px\}\
-  .ref .rt .no\{color:var(--violet);font-family:var(--mono);font-size:12px;margin-right:6px\}\
-  .ref .ru\{font-family:var(--mono);font-size:11.5px;color:var(--muted-2);word-break:break-all\}\
-  .ref .arrow\{position:absolute;top:14px;right:14px;color:var(--muted-2);transition:.15s\}\
-  .ref:hover .arrow\{color:var(--violet);transform:translate(2px,-2px)\}\
-  .ref .arrow svg\{width:15px;height:15px;display:block\}\
-\
-  footer\{margin-top:34px;text-align:center;color:var(--muted-2);font-size:11.5px\}\
-\
-  /* toast */\
-  .toast\{\
-    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);\
-    background:var(--teal);color:var(--ink);font-weight:600;font-size:13px;\
-    padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;\
-    transition:.25s ease;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:50;\
-  \}\
-  .toast.show\{opacity:1;transform:translateX(-50%) translateY(0)\}\
-</style>\
-</head>\
-<body>\
-<div class="wrap">\
-  <header>\
-    <div class="brand">\
-      <div class="logo" aria-hidden="true">\
-        <svg viewBox="0 0 24 24" fill="none" stroke="#F5B94D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\
-          <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/>\
-          <line x1="7" y1="7" x2="7.01" y2="7"/>\
-        </svg>\
-      </div>\
-      <div>\
-        <h1>Tag \uc0\u25351 \u20196 \u29983 \u25104 \u22120 </h1>\
-        <div class="sub">\uc0\u36028 \u19978 \u23553 \u37782 \u36890 \u30693  \'b7 \u33258 \u21205 \u29986 \u29983  \u65312 Allan \u25351 \u20196 </div>\
-      </div>\
-    </div>\
-    <div class="mode" role="group" aria-label="\uc0\u25351 \u20196 \u27169 \u24335 ">\
-      <button class="rm" data-mode="remove" aria-pressed="true"><span class="dot"></span>\uc0\u31227 \u38500  Tag (\u8722 )</button>\
-      <button class="add" data-mode="add" aria-pressed="false"><span class="dot"></span>\uc0\u26032 \u22686  Tag (+)</button>\
-    </div>\
-  </header>\
-\
-  <div class="grid">\
-    <!-- INPUT -->\
-    <section class="panel">\
-      <div class="panel-head">\
-        <div class="panel-title">\uc0\u36028 \u19978  <b>\u36890 \u30693 \u25991 \u23383 </b></div>\
-        <button class="ghost" id="loadExample">\uc0\u36617 \u20837 \u31684 \u20363 </button>\
-      </div>\
-      <textarea id="input" spellcheck="false" placeholder="\uc0\u22312 \u36889 \u35041 \u36028 \u19978 \u12300 Banned Tag \u26356 \u26032 \u36890 \u30693 \u12301 \u20840 \u25991 \'85&#10;\u25903 \u25588 \u19968 \u27425 \u36028 \u22810 \u31558 \u65292 \u26371 \u36880 \u31558 \u29986 \u29983 \u25351 \u20196 \u12290 "></textarea>\
-      <div class="input-foot">\
-        <div class="count"><b id="charCount">0</b> \uc0\u23383 \u20803 </div>\
-        <button class="ghost" id="clearBtn">\uc0\u28165 \u31354 </button>\
-      </div>\
-    </section>\
-\
-    <!-- OUTPUT -->\
-    <section class="panel">\
-      <div class="panel-head">\
-        <div class="panel-title">\uc0\u29986 \u29983 \u30340  <b>\u25351 \u20196 </b></div>\
-        <button class="copyall" id="copyAll" style="display:none">\
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>\
-          \uc0\u35079 \u35069 \u20840 \u37096 \
-        </button>\
-      </div>\
-      <div class="results" id="results">\
-        <div class="empty">\
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M2 17h20"/><path d="M8 21h8"/></svg>\
-          <p>\uc0\u24038 \u20596 \u36028 \u19978 \u36890 \u30693 \u24460 \u65292 \u36889 \u35041 \u26371 \u21363 \u26178 \u21015 \u20986 \u27599 \u19968 \u31558 \u30340  <strong style="color:var(--muted)">ID</strong>\u12289 \u25104 \u21151 \u30340  <strong style="color:var(--muted)">Tag</strong> \u33287 \u21487 \u35079 \u35069 \u30340 \u25351 \u20196 \u12290 </p>\
-        </div>\
-      </div>\
-    </section>\
-  </div>\
-\
-  <!-- REFERENCE LINKS -->\
-  <div class="refs">\
-    <div class="refs-head"><span>\uc0\u35079 \u26597 \u36899 \u32080  \'b7 Mixpanel</span><div class="line"></div></div>\
-    <div class="ref-grid" id="refGrid"></div>\
-  </div>\
-\
-  <footer>Tag \uc0\u25351 \u20196 \u29983 \u25104 \u22120  \'b7 \u20839 \u37096 \u24037 \u20855  \'b7 \u36865 \u20986 \u21069 \u35531 \u21209 \u24517 \u20154 \u24037 \u35079 \u26597  ID \u33287  Tag</footer>\
-</div>\
-\
-<div class="toast" id="toast">\uc0\u24050 \u35079 \u35069 </div>\
-\
-<script>\
-(function()\{\
-  'use strict';\
-\
-  /* ---------- \uc0\u22266 \u23450 \u35079 \u26597 \u36899 \u32080  ---------- */\
-  const REFS = [\
-    \{ title:'\uc0\u26597 \u29992 \u25142 \u31449 \u20839 \u30332 \u35441 \u32000 \u37636 ', tail:'chat \'b7 2.0', url:'https://mixpanel.com/s/4z77wA' \},\
-    \{ title:'\uc0\u26597 \u31169 \u35338 \u65288 \u20027 \u25773 \u65286 \u29992 \u25142 \u23565 \u35441 \u20132 \u37679 \u26178 \u38291 \u24207 \u65289 ', tail:'chat \'b7 2.0', url:'https://mixpanel.com/s/4Cg4wo' \},\
-    \{ title:'\uc0\u29992 \u25142 \u30452 \u25773 \u38291 \u32842 \u22825 \u32000 \u37636 \u65288 username \u29992 \u25142  / user.id \u20027 \u25773 \u65289 ', tail:'chat \'b7 2.0', url:'https://mixpanel.com/s/UptPV' \},\
-  ];\
-\
-  const EXAMPLE =\
-`Banned Tag \uc0\u26356 \u26032 \u36890 \u30693 \
-\uc0\u29992 \u25142  ID: 5f81d698c0e594e8b619c445\
-\uc0\u29992 \u25142  name: ruru8314cl4\
-\uc0\u31105 \u29992 \u21407 \u22240 : \u20597 \u28204 \u21040 \u33394 \u24773 \u24341 \u27969 \u24291 \u21578 \
-\uc0\u35320 \u30332 \u20839 \u23481 : Telegram =\u39131 \u27231 \u35486 \u38899 \u65311 \
-AI \uc0\u21028 \u35712 \u29702 \u30001 : \u35426 \u21839 Telegram\u20006 \u24341 \u23566 \u33267 \u22806 \u37096 \u36914 \u34892 \u31169 \u23494 \u20114 \u21205 \u65292 \u28041 \u23244 \u33394 \u24773 \u24341 \u27969 \
-\uc0\u22519 \u34892 \u32080 \u26524 \u21295 \u22577 :\
-\uc0\u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \
-1. Tag banned: \uc0\u25104 \u21151 \
-2. Tag adult_spam: \uc0\u25104 \u21151 \
-\
-Banned Tag \uc0\u26356 \u26032 \u36890 \u30693  (\u32842 \u22825 \u23460 \u32218 \u36335 )\
-SWAG ID: 6a49f3f3a5877e339d2b320c\
-\uc0\u31105 \u29992 \u21407 \u22240 : \u20597 \u28204 \u21040 \u32842 \u22825 \u23460 \u30332 \u36865 \u24341 \u27969 \u24801 \u24847 \u24291 \u21578 \
-\uc0\u35320 \u30332 \u20839 \u23481 : \u24819 \u25171 \u39131 \u27231 \u24859 \u24859 \u30340 \u21733 \u21733 ,\u21487 \u20197 \u28155 \u21152 \u19968 \u19979  L ine \u65306  qe569\
-AI \uc0\u21028 \u35712 \u29702 \u30001 : True\
-\uc0\u22519 \u34892 \u32080 \u26524 \u21295 \u22577 :\
-\uc0\u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \
-1. Banned Tag:  \uc0\u25104 \u21151 \
-2. livestream_chat_spam Tag:  \uc0\u25104 \u21151 \
-\
-Banned Tag \uc0\u26356 \u26032 \u36890 \u30693  (\u20027 \u25773 \u25351 \u20196 \u35722 \u24418 \u23560 \u26696 )\
-\uc0\u20027 \u25773  ID: 6a380b4be466868fc339c8d2\
-\uc0\u31105 \u29992 \u21407 \u22240 : \u20597 \u28204 \u21040 \u20027 \u25773 \u33258 \u35330 \u25351 \u20196 \u24341 \u27969 \u34892 \u28858  (menu_drain)\
-\uc0\u35320 \u30332 \u20839 \u23481 : 'Line:  syy579\
-AI \uc0\u21028 \u35712 \u29702 \u30001 : \u35422 \u24235 \u21629 \u20013 \u65292 \u20813 \u27298 \u30452 \u25509 \u23553 \u37782 \
-\uc0\u22519 \u34892 \u32080 \u26524 \u21295 \u22577 :\
-\uc0\u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \
-1. Banned Tag:  \uc0\u25104 \u21151 \
-2. menu_drain Tag:  \uc0\u25104 \u21151 \
-\
-Banned Tag \uc0\u26356 \u26032 \u36890 \u30693 \
-\uc0\u29992 \u25142  ID: 6a207290d0d43c0db93b5fc8\
-\uc0\u29992 \u25142  name: kitty.meo\
-\uc0\u31105 \u29992 \u21407 \u22240 : \u35320 \u30332 \u20108 \u32026 \u25935 \u24863 \u35422 \
-\uc0\u25935 \u24863 \u35422 \u20839 \u23481 : \u20320 \u30340 \u22068 \u24590 \u20040 \u20102 \u65311 \u25105 \u38271 \u20102 \u21475 \u33108 \u28291 \u30113 \u12290 \u30452 \u25509 \u22312  Telegram \u25110  Zalo \u19978 \u32473 \u25105 \u25171 \u30005 \u35805 \u23601 \u34892 \u12290 \
-\uc0\u22519 \u34892 \u32080 \u26524 \u21295 \u22577 :\
-\uc0\u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \u9473 \
-1. Tag banned:  \uc0\u25104 \u21151 \
-2. Tag Diamond_Laundering_Risk: \uc0\u25104 \u21151 `;\
-\
-  const AT = '\uc0\u65312 '; // \u20840 \u24418  @\u65292 \u33287 \u23526 \u38555 \u25351 \u20196 \u19968 \u33268 \
-  let mode = 'remove';\
-\
-  const $ = s => document.querySelector(s);\
-  const input = $('#input');\
-  const results = $('#results');\
-  const toastEl = $('#toast');\
-\
-  /* ---------- \uc0\u35299 \u26512  ---------- */\
-  function parse(text)\{\
-    if(!text.trim()) return [];\
-    const out = [];\
-    // \uc0\u20197 \u12300 ID:\u12301 \u37672 \u23450  24 \u30908  hex\u65288 MongoDB ObjectId\u65289 \u65292 \u36991 \u20813 \u35492 \u25235  n8n workflow \u38620 \u28234 \
-    const idRe = /ID\\s*[:\uc0\u65306 ]\\s*([a-fA-F0-9]\{24\})/g;\
-    const anchors = [];\
-    let m;\
-    while((m = idRe.exec(text)) !== null)\{\
-      anchors.push(\{ id:m[1], start:m.index \});\
-    \}\
-    for(let i=0;i<anchors.length;i++)\{\
-      const start = anchors[i].start;\
-      const end = (i+1<anchors.length) ? anchors[i+1].start : text.length;\
-      const section = text.slice(start, end);\
-      const \{ ok, failed \} = extractTags(section);\
-      const name  = (section.match(/name\\s*[:\uc0\u65306 ]\\s*([^\\s]+)/i) || [])[1] || '';\
-      const reason= (section.match(/\uc0\u31105 \u29992 \u21407 \u22240 \\s*[:\u65306 ]\\s*(.+)/) || [])[1] || '';\
-      out.push(\{ id:anchors[i].id, tags:ok, failed, name, reason:reason.trim() \});\
-    \}\
-    return out;\
-  \}\
-\
-  function extractTags(section)\{\
-    const seen = new Set();\
-    const ok = [], failed = [];\
-    // \uc0\u20841 \u31278 \u26684 \u24335 \u65306   N. Tag \{name\}: \u25104 \u21151    /   N. \{name\} Tag: \u25104 \u21151 \
-    const patterns = [\
-      /^\\s*\\d+\\.\\s*Tag\\s+([\\w-]+)\\s*[:\uc0\u65306 ]\\s*(\\S+)/i,\
-      /^\\s*\\d+\\.\\s*([\\w-]+)\\s+Tag\\s*[:\uc0\u65306 ]\\s*(\\S+)/i,\
-    ];\
-    section.split(/\\r?\\n/).forEach(line=>\{\
-      for(const re of patterns)\{\
-        const mm = line.match(re);\
-        if(mm)\{\
-          let tag = mm[1];\
-          if(tag.toLowerCase()==='banned') tag='banned';\
-          const success = /\uc0\u25104 \u21151 |success|true/i.test(mm[2]);\
-          if(!seen.has(tag))\{\
-            seen.add(tag);\
-            (success ? ok : failed).push(tag);\
-          \}\
-          break;\
-        \}\
-      \}\
-    \});\
-    // banned \uc0\u27704 \u36960 \u25490 \u26368 \u21069 \
-    const ordered = ok.filter(t=>t==='banned').concat(ok.filter(t=>t!=='banned'));\
-    return \{ ok:ordered, failed \};\
-  \}\
-\
-  /* ---------- \uc0\u25351 \u20196 \u32068 \u35037  ---------- */\
-  function buildCommand(id, tags)\{\
-    const op = mode==='add' ? '+' : '-';\
-    return AT + 'Allan utag ' + id + '/' + tags.map(t=>op+t).join(' ');\
-  \}\
-  function highlight(id, tags)\{\
-    const op = mode==='add' ? '+' : '-';\
-    const parts = tags.map(t=>'<span class="op">'+op+'</span>'+escapeHtml(t)).join(' ');\
-    return '<span class="at">'+AT+'</span>Allan utag <span class="id">'+id+'</span><span class="slash">/</span>'+parts;\
-  \}\
-\
-  /* ---------- \uc0\u30059 \u38754  ---------- */\
-  function render()\{\
-    const text = input.value;\
-    $('#charCount').textContent = text.length;\
-    const items = parse(text);\
-\
-    // \uc0\u20381 \u27169 \u24335 \u20999 \u25563  toggle \u27171 \u24335 \
-    document.querySelectorAll('.mode button').forEach(b=>\{\
-      b.setAttribute('aria-pressed', String(b.dataset.mode===mode));\
-    \});\
-\
-    if(!text.trim())\{\
-      results.innerHTML =\
-        '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M2 17h20"/><path d="M8 21h8"/></svg>'+\
-        '<p>\uc0\u24038 \u20596 \u36028 \u19978 \u36890 \u30693 \u24460 \u65292 \u36889 \u35041 \u26371 \u21363 \u26178 \u21015 \u20986 \u27599 \u19968 \u31558 \u30340  <strong style="color:var(--muted)">ID</strong>\u12289 \u25104 \u21151 \u30340  <strong style="color:var(--muted)">Tag</strong> \u33287 \u21487 \u35079 \u35069 \u30340 \u25351 \u20196 \u12290 </p></div>';\
-      $('#copyAll').style.display='none';\
-      return;\
-    \}\
-    if(items.length===0)\{\
-      results.innerHTML =\
-        '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+\
-        '<p style="color:var(--muted)">\uc0\u25214 \u19981 \u21040 \u31526 \u21512 \u26684 \u24335 \u30340  ID \u25110  Tag\u12290 \u35531 \u30906 \u35469 \u25991 \u23383 \u21253 \u21547  <code style="color:var(--gold)">ID:</code> \u33287  <code style="color:var(--gold)">\u22519 \u34892 \u32080 \u26524 \u21295 \u22577 </code> \u30340  Tag \u28165 \u21934 \u12290 </p></div>';\
-      $('#copyAll').style.display='none';\
-      return;\
-    \}\
-\
-    results.innerHTML='';\
-    const bar = document.createElement('div');\
-    bar.className='bar';\
-    bar.innerHTML = '<div class="n">\uc0\u20849  <b>'+items.length+'</b> \u31558 </div>';\
-    results.appendChild(bar);\
-\
-    const valid = [];\
-    items.forEach((it, i)=>\{\
-      const card = document.createElement('div');\
-      card.className='card';\
-\
-      const hasTags = it.tags.length>0;\
-      const cmd = hasTags ? buildCommand(it.id, it.tags) : '';\
-      if(hasTags) valid.push(cmd);\
-\
-      let chips = it.tags.map(t=>\{\
-        const cls = t==='banned' ? 'banned' : 'tag';\
-        return '<span class="chip '+cls+'">'+escapeHtml(t)+'</span>';\
-      \}).join('');\
-      let failChips = it.failed.map(t=>'<span class="chip fail">'+escapeHtml(t)+'</span>').join('');\
-\
-      card.innerHTML =\
-        '<div class="card-top"><div class="who">'+\
-          '<span class="idx">#'+(i+1)+'</span>'+\
-          (it.name ? '<span class="name">name <b>'+escapeHtml(it.name)+'</b></span>' : (it.reason?'<span class="name">'+escapeHtml(truncate(it.reason,26))+'</span>':''))+\
-        '</div>'+\
-          (hasTags?'<span class="ok-badge">'+it.tags.length+' Tag</span>':'')+\
-        '</div>'+\
-        '<div class="kv"><span class="k">ID</span><span class="idpill">'+it.id+'</span></div>'+\
-        '<div class="chips">'+chips+failChips+'</div>'+\
-        (hasTags\
-          ? '<div class="cmd-row">'+\
-              '<div class="cmd'+(mode==='add'?' add-mode':'')+'">'+highlight(it.id, it.tags)+'</div>'+\
-              '<button class="copy" data-cmd="'+encodeURIComponent(cmd)+'">'+\
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>\uc0\u35079 \u35069 </button>'+\
-            '</div>'\
-          : '<div class="warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>\uc0\u27492 \u31558 \u26410 \u20597 \u28204 \u21040 \u25104 \u21151 \u30340  Tag\u65292 \u26410 \u29986 \u29983 \u25351 \u20196 \u12290 </div>')+\
-        (it.failed.length ? '<div class="warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>\uc0\u20597 \u28204 \u21040 \u26410 \u25104 \u21151 \u30340  Tag\u65288 '+it.failed.map(escapeHtml).join(', ')+'\u65289 \u65292 \u24050 \u25490 \u38500 \u12290 </div>' : '');\
-\
-      results.appendChild(card);\
-    \});\
-\
-    // \uc0\u35079 \u35069 \u20840 \u37096 \
-    const copyAll = $('#copyAll');\
-    if(valid.length>1)\{\
-      copyAll.style.display='flex';\
-      copyAll.onclick = ()=>\{ copy(valid.join('\\n'), copyAll, valid.length+' \uc0\u31558 \u25351 \u20196 \u24050 \u35079 \u35069 '); \};\
-    \} else \{\
-      copyAll.style.display='none';\
-    \}\
-\
-    // \uc0\u32129 \u23450 \u21934 \u31558 \u35079 \u35069 \
-    results.querySelectorAll('.copy').forEach(btn=>\{\
-      btn.onclick = ()=>\{\
-        copy(decodeURIComponent(btn.dataset.cmd), btn, '\uc0\u25351 \u20196 \u24050 \u35079 \u35069 ');\
-        btn.classList.add('done');\
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>\uc0\u24050 \u35079 \u35069 ';\
-        setTimeout(()=>\{\
-          btn.classList.remove('done');\
-          btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>\uc0\u35079 \u35069 ';\
-        \},1400);\
-      \};\
-    \});\
-  \}\
-\
-  /* ---------- \uc0\u24037 \u20855  ---------- */\
-  function escapeHtml(s)\{return String(s).replace(/[&<>"']/g,c=>(\{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'\}[c]));\}\
-  function truncate(s,n)\{return s.length>n ? s.slice(0,n)+'\'85' : s;\}\
-\
-  function copy(str, btn, msg)\{\
-    const done = ()=>toast(msg||'\uc0\u24050 \u35079 \u35069 ');\
-    if(navigator.clipboard && navigator.clipboard.writeText)\{\
-      navigator.clipboard.writeText(str).then(done).catch(()=>fallbackCopy(str,done));\
-    \} else \{ fallbackCopy(str, done); \}\
-    if(btn && btn.classList.contains('copyall'))\{\
-      btn.classList.add('done');\
-      setTimeout(()=>btn.classList.remove('done'),1400);\
-    \}\
-  \}\
-  function fallbackCopy(str, cb)\{\
-    const ta=document.createElement('textarea');\
-    ta.value=str;ta.style.position='fixed';ta.style.opacity='0';\
-    document.body.appendChild(ta);ta.select();\
-    try\{document.execCommand('copy');cb&&cb();\}catch(e)\{\}\
-    document.body.removeChild(ta);\
-  \}\
-  let toastTimer;\
-  function toast(msg)\{\
-    toastEl.textContent=msg;toastEl.classList.add('show');\
-    clearTimeout(toastTimer);\
-    toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1600);\
-  \}\
-\
-  /* ---------- \uc0\u35079 \u26597 \u36899 \u32080 \u28210 \u26579  ---------- */\
-  function renderRefs()\{\
-    const g = $('#refGrid');\
-    g.innerHTML = REFS.map((r,i)=>\
-      '<a class="ref" href="'+r.url+'" target="_blank" rel="noopener">'+\
-        '<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>'+\
-        '<div class="rt"><span class="no">0'+(i+1)+'</span>'+escapeHtml(r.title)+'</div>'+\
-        '<div class="ru">'+escapeHtml(r.url)+'</div>'+\
-      '</a>'\
-    ).join('');\
-  \}\
-\
-  /* ---------- \uc0\u20107 \u20214  ---------- */\
-  input.addEventListener('input', render);\
-  $('#clearBtn').onclick = ()=>\{ input.value=''; input.focus(); render(); \};\
-  $('#loadExample').onclick = ()=>\{ input.value=EXAMPLE; render(); input.scrollTop=0; \};\
-  document.querySelectorAll('.mode button').forEach(b=>\{\
-    b.onclick=()=>\{ mode=b.dataset.mode; render(); \};\
-  \});\
-\
-  renderRefs();\
-  render();\
-\})();\
-</script>\
-</body>\
-</html>}
+  /* ---------- Header ---------- */
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:20px;flex-wrap:wrap;margin-bottom:22px;
+    padding-bottom:18px;border-bottom:1px solid var(--line-soft);
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{
+    width:44px;height:44px;border-radius:12px;flex:0 0 auto;
+    background:linear-gradient(145deg,#22304e,#141b2e);
+    border:1px solid var(--line);
+    display:grid;place-items:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .logo svg{width:22px;height:22px}
+  h1{font-size:20px;font-weight:700;margin:0;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:2px;letter-spacing:.3px}
+
+  /* ---------- Mode toggle ---------- */
+  .mode{
+    display:flex;background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:4px;gap:2px;
+  }
+  .mode button{
+    font-family:var(--sans);font-size:13px;font-weight:600;color:var(--muted);
+    background:transparent;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;
+    transition:.16s ease;display:flex;align-items:center;gap:7px;
+  }
+  .mode button .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.6}
+  .mode button[aria-pressed="true"]{color:var(--ink)}
+  .mode button.rm[aria-pressed="true"]{background:var(--red);box-shadow:0 3px 14px rgba(255,107,91,.28)}
+  .mode button.add[aria-pressed="true"]{background:var(--teal);box-shadow:0 3px 14px rgba(63,214,140,.25)}
+
+  /* ---------- Grid ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .panel{
+    background:linear-gradient(180deg,var(--surface),#121829);
+    border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:13px 16px;border-bottom:1px solid var(--line-soft);
+  }
+  .panel-title{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+  .panel-title b{color:var(--gold)}
+  .ghost{
+    font-family:var(--sans);font-size:12.5px;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:8px;
+    padding:6px 11px;cursor:pointer;transition:.15s;
+  }
+  .ghost:hover{color:var(--text);border-color:var(--muted-2);background:var(--surface-2)}
+
+  /* ---------- Input ---------- */
+  textarea{
+    width:100%;min-height:360px;resize:vertical;display:block;
+    background:transparent;border:0;color:var(--text);
+    font-family:var(--mono);font-size:13.5px;line-height:1.7;
+    padding:16px;outline:none;
+  }
+  textarea::placeholder{color:var(--muted-2)}
+  .input-foot{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px;border-top:1px solid var(--line-soft);
+    font-size:12px;color:var(--muted);
+  }
+  .count b{color:var(--text);font-family:var(--mono)}
+
+  /* ---------- Results ---------- */
+  .results{padding:14px;display:flex;flex-direction:column;gap:14px;min-height:360px}
+  .empty{
+    margin:auto;text-align:center;color:var(--muted-2);padding:30px 16px;max-width:320px;
+  }
+  .empty svg{width:40px;height:40px;opacity:.5;margin-bottom:12px}
+  .empty p{margin:6px 0;font-size:13.5px}
+
+  .card{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px;position:relative;
+    animation:pop .25s ease both;
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+  .who{display:flex;align-items:center;gap:9px;min-width:0}
+  .idx{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted);
+    background:var(--ink);border:1px solid var(--line);border-radius:7px;
+    padding:3px 7px;flex:0 0 auto;
+  }
+  .name{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .name b{color:var(--text);font-weight:600}
+
+  .kv{display:flex;align-items:center;gap:8px;margin-bottom:11px;font-size:12px}
+  .kv .k{color:var(--muted-2);flex:0 0 auto}
+  .idpill{
+    font-family:var(--mono);font-size:12.5px;color:var(--text);
+    background:var(--ink);border:1px solid var(--line);border-radius:8px;
+    padding:5px 9px;letter-spacing:.4px;
+  }
+  .ok-badge{font-size:10.5px;color:var(--teal);border:1px solid var(--teal-dim);background:var(--teal-dim);border-radius:6px;padding:2px 6px;flex:0 0 auto}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .chip{
+    font-family:var(--mono);font-size:11.5px;font-weight:500;
+    border-radius:7px;padding:4px 9px;display:inline-flex;align-items:center;gap:5px;
+  }
+  .chip.banned{color:var(--red);background:var(--red-dim);border:1px solid rgba(255,107,91,.28)}
+  .chip.tag{color:var(--gold);background:var(--gold-dim);border:1px solid rgba(245,185,77,.3)}
+  .chip.fail{color:var(--muted-2);background:transparent;border:1px dashed var(--muted-2);text-decoration:line-through}
+
+  .cmd-row{display:flex;align-items:stretch;gap:8px}
+  .cmd{
+    flex:1;min-width:0;
+    font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--text);
+    background:var(--ink);border:1px solid var(--line);border-radius:10px;
+    padding:11px 12px;overflow-x:auto;white-space:pre;
+  }
+  .cmd .op{color:var(--red)}
+  .cmd.add-mode .op{color:var(--teal)}
+  .cmd .slash{color:var(--muted-2)}
+  .cmd .id{color:var(--violet)}
+  .cmd .at{color:var(--gold)}
+  .copy{
+    flex:0 0 auto;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;
+    color:var(--ink);background:var(--gold);border:0;border-radius:10px;padding:0 15px;
+    display:flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap;
+  }
+  .copy:hover{filter:brightness(1.06)}
+  .copy.done{background:var(--teal)}
+  .copy svg{width:14px;height:14px}
+
+  .warn{
+    margin-top:10px;font-size:12px;color:var(--gold);
+    display:flex;align-items:flex-start;gap:7px;
+    background:rgba(245,185,77,.07);border:1px solid rgba(245,185,77,.2);
+    border-radius:8px;padding:8px 10px;
+  }
+  .warn svg{width:14px;height:14px;flex:0 0 auto;margin-top:2px}
+
+  .bar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:6px 2px 2px;
+  }
+  .bar .n{font-size:12px;color:var(--muted)}
+  .bar .n b{color:var(--gold);font-family:var(--mono)}
+  .copyall{
+    font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;
+    color:var(--text);background:var(--surface-2);border:1px solid var(--line);
+    border-radius:9px;padding:8px 14px;display:flex;align-items:center;gap:7px;transition:.15s;
+  }
+  .copyall:hover{border-color:var(--gold);color:var(--gold)}
+  .copyall.done{border-color:var(--teal);color:var(--teal)}
+
+  /* ---------- Reference links ---------- */
+  .refs{margin-top:24px}
+  .refs-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .refs-head .line{height:1px;background:var(--line-soft);flex:1}
+  .refs-head span{font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .ref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:860px){.ref-grid{grid-template-columns:1fr}}
+  .ref{
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:15px 16px;display:flex;flex-direction:column;gap:8px;transition:.15s;
+    text-decoration:none;color:inherit;cursor:pointer;position:relative;
+  }
+  .ref:hover{border-color:var(--violet);transform:translateY(-2px);background:var(--surface-2)}
+  .ref:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+  .ref .rt{font-size:13px;font-weight:600;color:var(--text);line-height:1.45;padding-right:22px}
+  .ref .rt .no{color:var(--violet);font-family:var(--mono);font-size:12px;margin-right:6px}
+  .ref .ru{font-family:var(--mono);font-size:11.5px;color:var(--muted-2);word-break:break-all}
+  .ref .arrow{position:absolute;top:14px;right:14px;color:var(--muted-2);transition:.15s}
+  .ref:hover .arrow{color:var(--violet);transform:translate(2px,-2px)}
+  .ref .arrow svg{width:15px;height:15px;display:block}
+
+  footer{margin-top:34px;text-align:center;color:var(--muted-2);font-size:11.5px}
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--teal);color:var(--ink);font-weight:600;font-size:13px;
+    padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;
+    transition:.25s ease;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F5B94D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Tag 指令生成器</h1>
+        <div class="sub">貼上封鎖通知 · 自動產生 ＠Allan 指令</div>
+      </div>
+    </div>
+    <div class="mode" role="group" aria-label="指令模式">
+      <button class="rm" data-mode="remove" aria-pressed="true"><span class="dot"></span>移除 Tag (−)</button>
+      <button class="add" data-mode="add" aria-pressed="false"><span class="dot"></span>新增 Tag (+)</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- INPUT -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">貼上 <b>通知文字</b></div>
+        <button class="ghost" id="loadExample">載入範例</button>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="在這裡貼上「Banned Tag 更新通知」全文…&#10;支援一次貼多筆，會逐筆產生指令。"></textarea>
+      <div class="input-foot">
+        <div class="count"><b id="charCount">0</b> 字元</div>
+        <button class="ghost" id="clearBtn">清空</button>
+      </div>
+    </section>
+
+    <!-- OUTPUT -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">產生的 <b>指令</b></div>
+        <button class="copyall" id="copyAll" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          複製全部
+        </button>
+      </div>
+      <div class="results" id="results">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M2 17h20"/><path d="M8 21h8"/></svg>
+          <p>左側貼上通知後，這裡會即時列出每一筆的 <strong style="color:var(--muted)">ID</strong>、成功的 <strong style="color:var(--muted)">Tag</strong> 與可複製的指令。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- REFERENCE LINKS -->
+  <div class="refs">
+    <div class="refs-head"><span>複查連結 · Mixpanel</span><div class="line"></div></div>
+    <div class="ref-grid" id="refGrid"></div>
+  </div>
+
+  <footer>Tag 指令生成器 · 內部工具 · 送出前請務必人工複查 ID 與 Tag</footer>
+</div>
+
+<div class="toast" id="toast">已複製</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- 固定複查連結 ---------- */
+  const REFS = [
+    { title:'查用戶站內發話紀錄', tail:'chat · 2.0', url:'https://mixpanel.com/s/4z77wA' },
+    { title:'查私訊（主播＆用戶對話交錯時間序）', tail:'chat · 2.0', url:'https://mixpanel.com/s/4Cg4wo' },
+    { title:'用戶直播間聊天紀錄（username 用戶 / user.id 主播）', tail:'chat · 2.0', url:'https://mixpanel.com/s/UptPV' },
+  ];
+
+  const EXAMPLE =
+`Banned Tag 更新通知
+用戶 ID: 5f81d698c0e594e8b619c445
+用戶 name: ruru8314cl4
+禁用原因: 偵測到色情引流廣告
+觸發內容: Telegram =飛機語音？
+AI 判讀理由: 詢問Telegram並引導至外部進行私密互動，涉嫌色情引流
+執行結果匯報:
+━━━━━━━━━━━━━━
+1. Tag banned: 成功
+2. Tag adult_spam: 成功
+
+Banned Tag 更新通知 (聊天室線路)
+SWAG ID: 6a49f3f3a5877e339d2b320c
+禁用原因: 偵測到聊天室發送引流惡意廣告
+觸發內容: 想打飛機愛愛的哥哥,可以添加一下 L ine ： qe569
+AI 判讀理由: True
+執行結果匯報:
+━━━━━━━━━━━━━━
+1. Banned Tag:  成功
+2. livestream_chat_spam Tag:  成功
+
+Banned Tag 更新通知 (主播指令變形專案)
+主播 ID: 6a380b4be466868fc339c8d2
+禁用原因: 偵測到主播自訂指令引流行為 (menu_drain)
+觸發內容: 'Line:  syy579
+AI 判讀理由: 詞庫命中，免檢直接封鎖
+執行結果匯報:
+━━━━━━━━━━━━━━
+1. Banned Tag:  成功
+2. menu_drain Tag:  成功
+
+Banned Tag 更新通知
+用戶 ID: 6a207290d0d43c0db93b5fc8
+用戶 name: kitty.meo
+禁用原因: 觸發二級敏感詞
+敏感詞內容: 你的嘴怎么了？我长了口腔溃疡。直接在 Telegram 或 Zalo 上给我打电话就行。
+執行結果匯報:
+━━━━━━━━━━━━━━
+1. Tag banned:  成功
+2. Tag Diamond_Laundering_Risk: 成功`;
+
+  const AT = '＠'; // 全形 @，與實際指令一致
+  let mode = 'remove';
+
+  const $ = s => document.querySelector(s);
+  const input = $('#input');
+  const results = $('#results');
+  const toastEl = $('#toast');
+
+  /* ---------- 解析 ---------- */
+  function parse(text){
+    if(!text.trim()) return [];
+    const out = [];
+    // 以「ID:」錨定 24 碼 hex（MongoDB ObjectId），避免誤抓 n8n workflow 雜湊
+    const idRe = /ID\s*[:：]\s*([a-fA-F0-9]{24})/g;
+    const anchors = [];
+    let m;
+    while((m = idRe.exec(text)) !== null){
+      anchors.push({ id:m[1], start:m.index });
+    }
+    for(let i=0;i<anchors.length;i++){
+      const start = anchors[i].start;
+      const end = (i+1<anchors.length) ? anchors[i+1].start : text.length;
+      const section = text.slice(start, end);
+      const { ok, failed } = extractTags(section);
+      const name  = (section.match(/name\s*[:：]\s*([^\s]+)/i) || [])[1] || '';
+      const reason= (section.match(/禁用原因\s*[:：]\s*(.+)/) || [])[1] || '';
+      out.push({ id:anchors[i].id, tags:ok, failed, name, reason:reason.trim() });
+    }
+    return out;
+  }
+
+  function extractTags(section){
+    const seen = new Set();
+    const ok = [], failed = [];
+    // 兩種格式：  N. Tag {name}: 成功   /   N. {name} Tag: 成功
+    const patterns = [
+      /^\s*\d+\.\s*Tag\s+([\w-]+)\s*[:：]\s*(\S+)/i,
+      /^\s*\d+\.\s*([\w-]+)\s+Tag\s*[:：]\s*(\S+)/i,
+    ];
+    section.split(/\r?\n/).forEach(line=>{
+      for(const re of patterns){
+        const mm = line.match(re);
+        if(mm){
+          let tag = mm[1];
+          if(tag.toLowerCase()==='banned') tag='banned';
+          const success = /成功|success|true/i.test(mm[2]);
+          if(!seen.has(tag)){
+            seen.add(tag);
+            (success ? ok : failed).push(tag);
+          }
+          break;
+        }
+      }
+    });
+    // banned 永遠排最前
+    const ordered = ok.filter(t=>t==='banned').concat(ok.filter(t=>t!=='banned'));
+    return { ok:ordered, failed };
+  }
+
+  /* ---------- 指令組裝 ---------- */
+  function buildCommand(id, tags){
+    const op = mode==='add' ? '+' : '-';
+    return AT + 'Allan utag ' + id + '/' + tags.map(t=>op+t).join(' ');
+  }
+  function highlight(id, tags){
+    const op = mode==='add' ? '+' : '-';
+    const parts = tags.map(t=>'<span class="op">'+op+'</span>'+escapeHtml(t)).join(' ');
+    return '<span class="at">'+AT+'</span>Allan utag <span class="id">'+id+'</span><span class="slash">/</span>'+parts;
+  }
+
+  /* ---------- 畫面 ---------- */
+  function render(){
+    const text = input.value;
+    $('#charCount').textContent = text.length;
+    const items = parse(text);
+
+    // 依模式切換 toggle 樣式
+    document.querySelectorAll('.mode button').forEach(b=>{
+      b.setAttribute('aria-pressed', String(b.dataset.mode===mode));
+    });
+
+    if(!text.trim()){
+      results.innerHTML =
+        '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M2 17h20"/><path d="M8 21h8"/></svg>'+
+        '<p>左側貼上通知後，這裡會即時列出每一筆的 <strong style="color:var(--muted)">ID</strong>、成功的 <strong style="color:var(--muted)">Tag</strong> 與可複製的指令。</p></div>';
+      $('#copyAll').style.display='none';
+      return;
+    }
+    if(items.length===0){
+      results.innerHTML =
+        '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
+        '<p style="color:var(--muted)">找不到符合格式的 ID 或 Tag。請確認文字包含 <code style="color:var(--gold)">ID:</code> 與 <code style="color:var(--gold)">執行結果匯報</code> 的 Tag 清單。</p></div>';
+      $('#copyAll').style.display='none';
+      return;
+    }
+
+    results.innerHTML='';
+    const bar = document.createElement('div');
+    bar.className='bar';
+    bar.innerHTML = '<div class="n">共 <b>'+items.length+'</b> 筆</div>';
+    results.appendChild(bar);
+
+    const valid = [];
+    items.forEach((it, i)=>{
+      const card = document.createElement('div');
+      card.className='card';
+
+      const hasTags = it.tags.length>0;
+      const cmd = hasTags ? buildCommand(it.id, it.tags) : '';
+      if(hasTags) valid.push(cmd);
+
+      let chips = it.tags.map(t=>{
+        const cls = t==='banned' ? 'banned' : 'tag';
+        return '<span class="chip '+cls+'">'+escapeHtml(t)+'</span>';
+      }).join('');
+      let failChips = it.failed.map(t=>'<span class="chip fail">'+escapeHtml(t)+'</span>').join('');
+
+      card.innerHTML =
+        '<div class="card-top"><div class="who">'+
+          '<span class="idx">#'+(i+1)+'</span>'+
+          (it.name ? '<span class="name">name <b>'+escapeHtml(it.name)+'</b></span>' : (it.reason?'<span class="name">'+escapeHtml(truncate(it.reason,26))+'</span>':''))+
+        '</div>'+
+          (hasTags?'<span class="ok-badge">'+it.tags.length+' Tag</span>':'')+
+        '</div>'+
+        '<div class="kv"><span class="k">ID</span><span class="idpill">'+it.id+'</span></div>'+
+        '<div class="chips">'+chips+failChips+'</div>'+
+        (hasTags
+          ? '<div class="cmd-row">'+
+              '<div class="cmd'+(mode==='add'?' add-mode':'')+'">'+highlight(it.id, it.tags)+'</div>'+
+              '<button class="copy" data-cmd="'+encodeURIComponent(cmd)+'">'+
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>複製</button>'+
+            '</div>'
+          : '<div class="warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>此筆未偵測到成功的 Tag，未產生指令。</div>')+
+        (it.failed.length ? '<div class="warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>偵測到未成功的 Tag（'+it.failed.map(escapeHtml).join(', ')+'），已排除。</div>' : '');
+
+      results.appendChild(card);
+    });
+
+    // 複製全部
+    const copyAll = $('#copyAll');
+    if(valid.length>1){
+      copyAll.style.display='flex';
+      copyAll.onclick = ()=>{ copy(valid.join('\n'), copyAll, valid.length+' 筆指令已複製'); };
+    } else {
+      copyAll.style.display='none';
+    }
+
+    // 綁定單筆複製
+    results.querySelectorAll('.copy').forEach(btn=>{
+      btn.onclick = ()=>{
+        copy(decodeURIComponent(btn.dataset.cmd), btn, '指令已複製');
+        btn.classList.add('done');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>已複製';
+        setTimeout(()=>{
+          btn.classList.remove('done');
+          btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>複製';
+        },1400);
+      };
+    });
+  }
+
+  /* ---------- 工具 ---------- */
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function truncate(s,n){return s.length>n ? s.slice(0,n)+'…' : s;}
+
+  function copy(str, btn, msg){
+    const done = ()=>toast(msg||'已複製');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(str).then(done).catch(()=>fallbackCopy(str,done));
+    } else { fallbackCopy(str, done); }
+    if(btn && btn.classList.contains('copyall')){
+      btn.classList.add('done');
+      setTimeout(()=>btn.classList.remove('done'),1400);
+    }
+  }
+  function fallbackCopy(str, cb){
+    const ta=document.createElement('textarea');
+    ta.value=str;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');cb&&cb();}catch(e){}
+    document.body.removeChild(ta);
+  }
+  let toastTimer;
+  function toast(msg){
+    toastEl.textContent=msg;toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1600);
+  }
+
+  /* ---------- 複查連結渲染 ---------- */
+  function renderRefs(){
+    const g = $('#refGrid');
+    g.innerHTML = REFS.map((r,i)=>
+      '<a class="ref" href="'+r.url+'" target="_blank" rel="noopener">'+
+        '<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>'+
+        '<div class="rt"><span class="no">0'+(i+1)+'</span>'+escapeHtml(r.title)+'</div>'+
+        '<div class="ru">'+escapeHtml(r.url)+'</div>'+
+      '</a>'
+    ).join('');
+  }
+
+  /* ---------- 事件 ---------- */
+  input.addEventListener('input', render);
+  $('#clearBtn').onclick = ()=>{ input.value=''; input.focus(); render(); };
+  $('#loadExample').onclick = ()=>{ input.value=EXAMPLE; render(); input.scrollTop=0; };
+  document.querySelectorAll('.mode button').forEach(b=>{
+    b.onclick=()=>{ mode=b.dataset.mode; render(); };
+  });
+
+  renderRefs();
+  render();
+})();
+</script>
+</body>
+</html>
