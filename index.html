@@ -540,7 +540,10 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
   const AT='＠', BOT='Allan';
   const TAGCHARS='[A-Za-z0-9_\\-\\u4e00-\\u9fff]+';
   const LS={tags:'tagtool.palette.v2', counts:'tagtool.counts.v1', target:'tagtool.target.v1',
-            g:'tagtool.grad.v1', email:'tagtool.email.v1'};
+            g:'tagtool.grad.v1', email:'tagtool.email.v1', act:'tagtool.lastactive.v1'};
+
+  /* 閒置自動登出：超過 5 小時無操作即回到驗證頁 */
+  const IDLE_MS = 5*60*60*1000;   // 5 小時
 
   /* ============================================================
      ⚙️ 設定：把 Google Apps Script 部署後的 Web App 網址貼在這裡
@@ -708,15 +711,48 @@ Banned Tag 更新通知
 
   function openGate(){
     $('#gate').classList.remove('hide');
+    $('#gateEmail').value='';
     setTimeout(()=>$('#gateEmail').focus(),300);
   }
   function passGate(email){
     USER_EMAIL=email;
     store(LS.email,email);
+    touchActivity();
     $('#gate').classList.add('hide');
-    $('#me').innerHTML='<span>已登入 <b>'+esc(email)+'</b></span><button id="logout">切換</button>';
-    $('#logout').onclick=()=>{ USER_EMAIL=''; store(LS.email,''); openGate(); };
+    $('#me').innerHTML='<span>已登入 <b>'+esc(email)+'</b></span><button id="logout">登出</button>';
+    $('#logout').onclick=()=>logout(false);
   }
+  function logout(idle){
+    USER_EMAIL='';
+    store(LS.email,'');
+    store(LS.act,0);
+    lastAuto='';                       // 清掉自動複製的去重狀態
+    $('#me').innerHTML='';
+    openGate();
+    if(idle){
+      const msg=$('#gateMsg');
+      msg.textContent='閒置超過 5 小時，已自動登出，請重新驗證';
+      msg.classList.add('on');
+    }
+  }
+
+  /* ---- 閒置偵測 ---- */
+  let lastAct = load(LS.act, 0) || 0;
+  function touchActivity(){
+    if(!USER_EMAIL) return;
+    const now=Date.now();
+    if(now-lastAct < 30000) return;    // 節流：最多 30 秒寫一次
+    lastAct=now; store(LS.act, now);
+  }
+  function checkIdle(){
+    if(!USER_EMAIL) return;
+    if(Date.now()-lastAct > IDLE_MS) logout(true);
+  }
+  ['mousedown','keydown','wheel','touchstart','scroll','dragstart'].forEach(ev=>{
+    window.addEventListener(ev, touchActivity, {passive:true});
+  });
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkIdle(); });
+  setInterval(checkIdle, 60000);       // 每分鐘檢查一次
   function tryGate(){
     const inp=$('#gateEmail'), msg=$('#gateMsg');
     const r=validateEmail(inp.value);
@@ -981,7 +1017,18 @@ Banned Tag 更新通知
   /* init */
   const saved=load(LS.email,'');
   const sv=validateEmail(saved);
-  if(sv.ok) passGate(sv.email); else openGate();
+  const idleExpired = !lastAct || (Date.now()-lastAct > IDLE_MS);
+  if(sv.ok && !idleExpired){
+    passGate(sv.email);
+  }else if(sv.ok && idleExpired){
+    USER_EMAIL=''; store(LS.email,'');
+    openGate();
+    const msg=$('#gateMsg');
+    msg.textContent='閒置超過 5 小時，已自動登出，請重新驗證';
+    msg.classList.add('on');
+  }else{
+    openGate();
+  }
 
   setG(load(LS.g,'candy'));
   setHC(load('tagtool.hc.v1',false));
