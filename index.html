@@ -360,6 +360,51 @@ textarea{text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .ref .ru{font-family:var(--mono);font-size:11.5px;color:var(--faint);word-break:break-all}
 
 footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;text-shadow:0 1px 3px rgba(0,0,0,.2)}
+/* ===== Email 驗證閘門 ===== */
+#gate{
+  position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:rgba(8,5,22,.55);
+  backdrop-filter:blur(22px) saturate(1.2);-webkit-backdrop-filter:blur(22px) saturate(1.2);
+  transition:opacity .5s ease, visibility .5s ease;
+}
+#gate.hide{opacity:0;visibility:hidden;pointer-events:none}
+.gate-card{
+  width:100%;max-width:440px;padding:32px 30px;border-radius:24px;text-align:center;
+  background:var(--glass);border:1px solid var(--edge);
+  backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  box-shadow:0 24px 70px rgba(6,4,18,.5), inset 0 1px 0 rgba(255,255,255,.28);
+  animation:gateIn .5s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes gateIn{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+.gate-card .ico{font-size:40px;margin-bottom:10px}
+.gate-card h2{margin:0 0 6px;font-size:20px;font-weight:900;letter-spacing:.4px}
+.gate-card .gp{margin:0 0 22px;font-size:13px;color:var(--muted);line-height:1.7}
+#gateEmail{
+  width:100%;font-family:var(--mono);font-size:15px;color:#fff;text-align:center;
+  background:var(--well);border:2px solid var(--edge-soft);border-radius:14px;
+  padding:14px 16px;outline:none;transition:.18s;
+}
+#gateEmail:focus{border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.18)}
+#gateEmail::placeholder{color:rgba(255,255,255,.5)}
+#gateEmail.err{border-color:var(--neg);animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+#gateBtn{
+  width:100%;margin-top:12px;font-size:14.5px;font-weight:700;cursor:pointer;color:#2A1D4A;
+  background:rgba(255,255,255,.9);border:1px solid #fff;border-radius:14px;padding:14px;transition:.16s;
+}
+#gateBtn:hover{background:#fff;transform:translateY(-1px)}
+#gateMsg{
+  margin-top:14px;min-height:20px;font-size:12.5px;font-weight:600;color:var(--neg);
+  opacity:0;transition:.2s;
+}
+#gateMsg.on{opacity:1}
+.gate-foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--edge-soft);font-size:11.5px;color:var(--faint);line-height:1.7}
+/* 已登入身分列 */
+.me{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--faint)}
+.me b{color:var(--muted);font-family:var(--mono);font-weight:500}
+.me button{background:none;border:0;color:var(--faint);font-size:11.5px;cursor:pointer;text-decoration:underline;padding:0}
+.me button:hover{color:#fff}
+
 .toast{
   position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);
   background:rgba(255,255,255,.9);color:#2A1D4A;font-weight:700;font-size:13.5px;
@@ -372,6 +417,19 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
 </head>
 <body data-g="candy">
 <div class="deco"><i></i><i></i><i></i><i></i><i></i></div>
+
+<!-- ===== Email 驗證閘門 ===== -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="ico">🏷️</div>
+    <h2>Tag 指令生成器</h2>
+    <p class="gp">此為內部工具，請以<b>公司 Email</b> 登入後使用。<br>操作紀錄將用於稽核與錯誤追蹤。</p>
+    <input type="email" id="gateEmail" placeholder="yourname@swag.live" spellcheck="false" autocomplete="email">
+    <button id="gateBtn">進入工具</button>
+    <div id="gateMsg"></div>
+    <div class="gate-foot">僅開放 @swag.live 公司信箱</div>
+  </div>
+</div>
 
 <div class="wrap">
   <header>
@@ -464,7 +522,12 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
     </div>
   </section>
 
-  <footer>🏷️ 送出前請再看一眼 ID 與 Tag · 內部效率工具</footer>
+  <footer>
+  <div style="display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap">
+    <span>送出前請再看一眼 ID 與 Tag · 內部效率工具</span>
+    <span class="me" id="me"></span>
+  </div>
+</footer>
 </div>
 <div class="toast" id="toast">已複製</div>
 
@@ -474,7 +537,18 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
   const $=s=>document.querySelector(s);
   const AT='＠', BOT='Allan';
   const TAGCHARS='[A-Za-z0-9_\\-\\u4e00-\\u9fff]+';
-  const LS={tags:'tagtool.palette.v2', counts:'tagtool.counts.v1', target:'tagtool.target.v1', g:'tagtool.grad.v1'};
+  const LS={tags:'tagtool.palette.v2', counts:'tagtool.counts.v1', target:'tagtool.target.v1',
+            g:'tagtool.grad.v1', email:'tagtool.email.v1'};
+
+  /* ============================================================
+     ⚙️ 設定：把 Google Apps Script 部署後的 Web App 網址貼在這裡
+     （留白則不記錄，工具仍可正常使用）
+     ============================================================ */
+  const GAS_URL = '';
+
+  const SPECIAL_ACCOUNTS = ['sam','bogi','lynn','pot','amy','bill.h','abby','maimai','suyu.c'];
+  const DOMAIN = 'swag.live';
+  let USER_EMAIL = '';
 
   const DEFAULT_TAGS=['banned','hidden','adult_spam','livestream_chat_spam','talents-headhunted','menu_drain','Diamond_Laundering_Risk','疑似盜刷'];
   const REFS=[
@@ -533,10 +607,72 @@ Banned Tag 更新通知
   const buildCmd=(t,add,rm)=>AT+BOT+' utag '+t+'/'+add.concat(rm.map(x=>'-'+x)).join(' ');
   const hlCmd=(t,add,rm)=>'<span class="at">'+AT+'</span>'+BOT+' utag <span class="id">'+esc(t)+'</span><span class="slash">/</span>'+
     add.map(x=>'<span class="plus">'+esc(x)+'</span>').concat(rm.map(x=>'<span class="minus">-'+esc(x)+'</span>')).join(' ');
-  function bindCopy(btn,text,msg){
-    btn.onclick=()=>{copy(text,msg);const o=btn.innerHTML;btn.classList.add('done');btn.innerHTML=OK_SVG;
-      setTimeout(()=>{btn.classList.remove('done');btn.innerHTML=o;},1400);};
+  function bindCopy(btn,text,msg,mode){
+    btn.onclick=()=>{
+      copy(text,msg);
+      logToSheet(mode||'-', text);
+      const o=btn.innerHTML;btn.classList.add('done');btn.innerHTML=OK_SVG;
+      setTimeout(()=>{btn.classList.remove('done');btn.innerHTML=o;},1400);
+    };
   }
+
+  /* ================= Email 驗證閘門 ================= */
+  const DENY_MSG='請使用公司信箱（@swag.live）登入查看';
+  function validateEmail(raw){
+    const email=String(raw||'').trim().toLowerCase();
+    if(!email) return {ok:false,msg:'請輸入公司 Email'};
+    const m=email.match(/^([^\s@]+)@([^\s@]+)$/);
+    if(!m) return {ok:false,msg:'Email 格式不正確'};
+    const local=m[1], domain=m[2];
+    if(domain!==DOMAIN) return {ok:false,msg:DENY_MSG};
+    if(SPECIAL_ACCOUNTS.includes(local)) return {ok:true,email};        // ① 特殊帳號
+    if(/^\d+$/.test(local)) return {ok:false,msg:DENY_MSG};             // ③-1 純數字
+    const parts=local.split('.');
+    if(parts.length!==2) return {ok:false,msg:DENY_MSG};                // ③-2 無「.」= 亂打／單字
+    const name=parts[0], surname=parts[1];
+    if(!/^[a-z]{2,}$/.test(name)) return {ok:false,msg:DENY_MSG};
+    if(!/^[a-z]+$/.test(surname)) return {ok:false,msg:DENY_MSG};
+    if(/^(.)\1{2,}$/.test(name)||/^(.)\1{2,}$/.test(surname)) return {ok:false,msg:DENY_MSG}; // 同字重複
+    return {ok:true,email};                                            // ② 常規格式
+  }
+
+  /* 寫入 Google Sheet：A=Email  B=時間  C=模式  D=指令 */
+  function logToSheet(mode, command){
+    if(!GAS_URL || !USER_EMAIL) return;
+    const payload={ email:USER_EMAIL, time:new Date().toISOString(), mode:mode, command:command };
+    try{
+      const body=JSON.stringify(payload);
+      if(navigator.sendBeacon){
+        navigator.sendBeacon(GAS_URL, new Blob([body],{type:'text/plain;charset=utf-8'}));
+      }else{
+        fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
+      }
+    }catch(e){ /* 記錄失敗不影響操作 */ }
+  }
+
+  function openGate(){
+    $('#gate').classList.remove('hide');
+    setTimeout(()=>$('#gateEmail').focus(),300);
+  }
+  function passGate(email){
+    USER_EMAIL=email;
+    store(LS.email,email);
+    $('#gate').classList.add('hide');
+    $('#me').innerHTML='<span>已登入 <b>'+esc(email)+'</b></span><button id="logout">切換</button>';
+    $('#logout').onclick=()=>{ USER_EMAIL=''; store(LS.email,''); openGate(); };
+  }
+  function tryGate(){
+    const inp=$('#gateEmail'), msg=$('#gateMsg');
+    const r=validateEmail(inp.value);
+    if(r.ok){ msg.classList.remove('on'); inp.classList.remove('err'); passGate(r.email); }
+    else{
+      msg.textContent=r.msg; msg.classList.add('on');
+      inp.classList.remove('err'); void inp.offsetWidth; inp.classList.add('err');
+    }
+  }
+  $('#gateBtn').onclick=tryGate;
+  $('#gateEmail').addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();tryGate();} });
+  $('#gateEmail').addEventListener('input',()=>$('#gateMsg').classList.remove('on'));
 
   /* ================= 模式一 ================= */
   const cleanStatus=s=>String(s).replace(/:[^:\s]+:/g,' ').replace(/[\u2700-\u27BF\uFE0F\u2B00-\u2BFF\u{1F300}-\u{1FAFF}]/gu,' ').trim();
@@ -592,10 +728,14 @@ Banned Tag 更新通知
             :'<div class="warn"><span>⚠️</span><span>此筆未偵測到成功的 Tag，未產生指令。</span></div>')+
         (it.failed.length?'<div class="warn"><span>⚠️</span><span>已排除未成功的 Tag：'+it.failed.map(esc).join('、')+'</span></div>':'');
       box.appendChild(card);
-      if(has)bindCopy(card.querySelector('.copy'),cmd,'指令已複製');
+      if(has)bindCopy(card.querySelector('.copy'),cmd,'指令已複製','模式一 · n8n alert');
     });
     if(all.length>1){ca.style.display='flex';ca.innerHTML=COPY_SVG+'複製全部';
-      ca.onclick=()=>{copy(all.join('\n'),all.length+' 筆指令已複製');ca.classList.add('done');setTimeout(()=>ca.classList.remove('done'),1400);};
+      ca.onclick=()=>{
+        copy(all.join('\n'),all.length+' 筆指令已複製');
+        all.forEach(c=>logToSheet('模式一 · n8n alert（批次）', c));
+        ca.classList.add('done');setTimeout(()=>ca.classList.remove('done'),1400);
+      };
     }else ca.style.display='none';
   }
 
@@ -673,7 +813,7 @@ Banned Tag 更新通知
       zones.add.map(t=>'<span class="chip pos">＋ '+esc(t)+'</span>').join('')+
       zones.rm.map(t=>'<span class="chip neg">− '+esc(t)+'</span>').join('')+'</div>'+
       '<div class="cmd-row"><div class="cmd">'+hlCmd(target,zones.add,zones.rm)+'</div><button class="copy" title="複製指令">'+COPY_SVG+'</button></div>';
-    bindCopy(out.querySelector('.copy'),cmd,'指令已複製');
+    bindCopy(out.querySelector('.copy'),cmd,'指令已複製','模式二 · 手動組指令');
   }
 
   /* 拖放：兩個區塊互拖 + 拖回標籤庫 */
@@ -746,6 +886,10 @@ Banned Tag 更新通知
   });
 
   /* init */
+  const saved=load(LS.email,'');
+  const sv=validateEmail(saved);
+  if(sv.ok) passGate(sv.email); else openGate();
+
   setG(load(LS.g,'candy'));
   setHC(load('tagtool.hc.v1',false));
   $('#target').value=load(LS.target,'')||'';
