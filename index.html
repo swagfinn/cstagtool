@@ -526,6 +526,7 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
   <div style="display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap">
     <span>送出前請再看一眼 ID 與 Tag · 內部效率工具</span>
     <span class="me" id="me"></span>
+    <span class="me"><button id="pingBtn">測試記錄連線</button></span>
   </div>
 </footer>
 </div>
@@ -550,7 +551,15 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
   const DOMAIN = 'swag.live';
   let USER_EMAIL = '';
 
-  const DEFAULT_TAGS=['banned','hidden','adult_spam','livestream_chat_spam','talents-headhunted','menu_drain','Diamond_Laundering_Risk','疑似盜刷'];
+  const DEFAULT_TAGS=['banned','hidden','adult_spam','livestream_chat_spam','talents-headhunted','menu_drain',
+    'Diamond_Laundering_Risk','疑似盜刷',
+    'fingerprint-pro:failed','fingerprint-pro:passed','fingerprint-pro:degraded:'];
+
+  /* 動態時戳標籤：產生指令當下的 Unix time + 6 小時 */
+  const TS_TAG    = 'fingerprint-pro:degraded:';
+  const TS_OFFSET = 6*3600;                       // 21600 秒
+  const nowTs     = ()=>Math.floor(Date.now()/1000);
+  const expandTag = t => t===TS_TAG ? t+(nowTs()+TS_OFFSET) : t;
   const REFS=[
     {t:'查用戶站內發話紀錄', u:'https://mixpanel.com/s/4z77wA'},
     {t:'查私訊（主播＆用戶對話交錯時間序）', u:'https://mixpanel.com/s/4Cg4wo'},
@@ -609,8 +618,10 @@ Banned Tag 更新通知
     add.map(x=>'<span class="plus">'+esc(x)+'</span>').concat(rm.map(x=>'<span class="minus">-'+esc(x)+'</span>')).join(' ');
   function bindCopy(btn,text,msg,mode){
     btn.onclick=()=>{
-      copy(text,msg);
-      logToSheet(mode||'-', text);
+      // text 可為函式：按下複製的當下才計算（時戳才會準）
+      const out = (typeof text==='function') ? text() : text;
+      copy(out,msg);
+      logToSheet(mode||'-', out);
       const o=btn.innerHTML;btn.classList.add('done');btn.innerHTML=OK_SVG;
       setTimeout(()=>{btn.classList.remove('done');btn.innerHTML=o;},1400);
     };
@@ -636,18 +647,39 @@ Banned Tag 更新通知
     return {ok:true,email};                                            // ② 常規格式
   }
 
-  /* 寫入 Google Sheet：A=Email  B=時間  C=模式  D=指令 */
+  /* 寫入 Google Sheet：A=Email  B=時間  C=模式  D=指令
+     用 JSONP：GAS 的 /exec 會 302 轉址，sendBeacon/no-cors POST 常被瀏覽器丟棄且不報錯。
+     JSONP 不受 CORS 限制、可穿過轉址，且能拿到回應以便確認成敗。 */
+  let jsonpSeq=0;
+  function gasCall(params, onDone){
+    if(!GAS_URL){ onDone && onDone({ok:false,error:'GAS_URL 未設定'}); return; }
+    const cb='__gas_cb_'+(++jsonpSeq)+'_'+Date.now();
+    const qs=Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k]??'')).join('&');
+    const sc=document.createElement('script');
+    let settled=false;
+    const finish=r=>{
+      if(settled) return; settled=true;
+      delete window[cb];
+      if(sc.parentNode) sc.parentNode.removeChild(sc);
+      onDone && onDone(r);
+    };
+    window[cb]=r=>finish(r);
+    sc.onerror=()=>finish({ok:false,error:'連線失敗（請檢查部署權限是否為「任何人」）'});
+    setTimeout(()=>finish({ok:false,error:'逾時無回應'}),12000);
+    sc.src=GAS_URL+'?callback='+cb+'&'+qs;
+    document.head.appendChild(sc);
+  }
+
   function logToSheet(mode, command){
     if(!GAS_URL || !USER_EMAIL) return;
-    const payload={ email:USER_EMAIL, time:new Date().toISOString(), mode:mode, command:command };
-    try{
-      const body=JSON.stringify(payload);
-      if(navigator.sendBeacon){
-        navigator.sendBeacon(GAS_URL, new Blob([body],{type:'text/plain;charset=utf-8'}));
-      }else{
-        fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
-      }
-    }catch(e){ /* 記錄失敗不影響操作 */ }
+    gasCall({
+      email: USER_EMAIL,
+      time:  new Date().toISOString(),
+      mode:  mode,
+      command: command
+    }, r=>{
+      if(!r || !r.ok) console.warn('[記錄失敗]', r && r.error);
+    });
   }
 
   function openGate(){
@@ -741,6 +773,12 @@ Banned Tag 更新通知
 
   /* ================= 模式二 ================= */
   let palette=load(LS.tags,DEFAULT_TAGS.slice());
+  // 舊使用者的 localStorage 沒有新標籤，補進去
+  (function mergeDefaults(){
+    let changed=false;
+    DEFAULT_TAGS.forEach(t=>{ if(!palette.includes(t)){ palette.push(t); changed=true; } });
+    if(changed) store(LS.tags,palette);
+  })();
   let counts =load(LS.counts,{});
   const zones={add:[],rm:[]};
 
@@ -808,12 +846,20 @@ Banned Tag 更新通知
     if(!target&&!has){out.innerHTML='<div class="empty"><span class="em">🎯</span><p>填入 Username / UID，<br>再把標籤拖進「新增」或「移除」</p></div>';return;}
     if(!target){out.innerHTML='<div class="warn"><span>⚠️</span><span>還差 <b>Username 或 UID</b>，填上就會產生指令。</span></div>';return;}
     if(!has){out.innerHTML='<div class="warn"><span>⚠️</span><span>還沒有任何 Tag，請從下方標籤庫拖曳加入。</span></div>';return;}
-    const cmd=buildCmd(target,zones.add,zones.rm);
+    const addOut = zones.add.map(expandTag);      // 只有「新增」區會展開時戳
+    const hasTs  = zones.add.includes(TS_TAG);
+
     out.innerHTML='<div class="chips">'+
-      zones.add.map(t=>'<span class="chip pos">＋ '+esc(t)+'</span>').join('')+
+      addOut.map(t=>'<span class="chip pos">＋ '+esc(t)+'</span>').join('')+
       zones.rm.map(t=>'<span class="chip neg">− '+esc(t)+'</span>').join('')+'</div>'+
-      '<div class="cmd-row"><div class="cmd">'+hlCmd(target,zones.add,zones.rm)+'</div><button class="copy" title="複製指令">'+COPY_SVG+'</button></div>';
-    bindCopy(out.querySelector('.copy'),cmd,'指令已複製','模式二 · 手動組指令');
+      '<div class="cmd-row"><div class="cmd">'+hlCmd(target,addOut,zones.rm)+'</div><button class="copy" title="複製指令">'+COPY_SVG+'</button></div>'+
+      (hasTs ? '<div class="warn"><span>⏱</span><span>已自動附上 <b>+6 小時</b> 的 Unix 時戳（'+
+               new Date((nowTs()+TS_OFFSET)*1000).toLocaleString('zh-TW')+' 到期）。時戳會在你按下複製的當下重新計算。</span></div>' : '');
+
+    // 傳函式：按下複製時才計算時戳，確保與複製時間一致
+    bindCopy(out.querySelector('.copy'),
+             ()=>buildCmd(target, zones.add.map(expandTag), zones.rm),
+             '指令已複製','模式二 · 手動組指令');
   }
 
   /* 拖放：兩個區塊互拖 + 拖回標籤庫 */
@@ -884,6 +930,15 @@ Banned Tag 更新通知
       document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===t.dataset.view));
     };
   });
+
+  $('#pingBtn').onclick=()=>{
+    if(!GAS_URL){ toast('尚未設定 GAS_URL'); return; }
+    toast('連線中…');
+    gasCall({ping:1}, r=>{
+      if(r && r.ok) toast('✔ 連線正常，記錄功能已啟用');
+      else toast('✘ ' + ((r&&r.error) || '連線失敗'));
+    });
+  };
 
   /* init */
   const saved=load(LS.email,'');
