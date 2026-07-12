@@ -382,10 +382,11 @@ Banned Tag 更新通知
   function extractTags(section){
     const seen = new Set();
     const ok = [], failed = [];
-    // 兩種格式：  N. Tag {name}: 成功   /   N. {name} Tag: 成功
+    // 兩種格式：  N. Tag {name}: 狀態   /   N. {name} Tag: 狀態
+    // 狀態一律取「冒號後的整行」，避免被 Slack emoji 短碼 (:白色勾勾:) 干擾
     const patterns = [
-      /^\s*\d+\.\s*Tag\s+([\w-]+)\s*[:：]\s*(\S+)/i,
-      /^\s*\d+\.\s*([\w-]+)\s+Tag\s*[:：]\s*(\S+)/i,
+      /^\s*\d+[.、)]?\s*Tag\s*[:：]?\s*([A-Za-z0-9_-]+)\s*[:：]\s*(.+)$/i,
+      /^\s*\d+[.、)]?\s*([A-Za-z0-9_-]+)\s+Tag\s*[:：]\s*(.+)$/i,
     ];
     section.split(/\r?\n/).forEach(line=>{
       for(const re of patterns){
@@ -393,10 +394,12 @@ Banned Tag 更新通知
         if(mm){
           let tag = mm[1];
           if(tag.toLowerCase()==='banned') tag='banned';
-          const success = /成功|success|true/i.test(mm[2]);
+          const status = cleanStatus(mm[2]);
+          const bad  = /失敗|失败|fail|error|錯誤|false|跳過|skip/i.test(status);
+          const good = /成功|success|完成|true|done|ok\b/i.test(status);
           if(!seen.has(tag)){
             seen.add(tag);
-            (success ? ok : failed).push(tag);
+            (good && !bad ? ok : failed).push(tag);
           }
           break;
         }
@@ -405,6 +408,14 @@ Banned Tag 更新通知
     // banned 永遠排最前
     const ordered = ok.filter(t=>t==='banned').concat(ok.filter(t=>t!=='banned'));
     return { ok:ordered, failed };
+  }
+
+  // 移除 Slack emoji 短碼與 Unicode 表情，只留下可判讀的狀態文字
+  function cleanStatus(s){
+    return String(s)
+      .replace(/:[^:\s]+:/g, ' ')
+      .replace(/[\u2700-\u27BF\uFE0F\u2B00-\u2BFF\u{1F300}-\u{1FAFF}]/gu, ' ')
+      .trim();
   }
 
   /* ---------- 指令組裝 ---------- */
