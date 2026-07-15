@@ -633,19 +633,41 @@ Banned Tag 更新通知
   const buildCmd=(t,add,rm)=>AT+BOT+' utag '+t+'/'+add.concat(rm.map(x=>'-'+x)).join(' ');
   const hlCmd=(t,add,rm)=>'<span class="at">'+AT+'</span>'+BOT+' utag <span class="id">'+esc(t)+'</span><span class="slash">/</span>'+
     add.map(x=>'<span class="plus">'+esc(x)+'</span>').concat(rm.map(x=>'<span class="minus">-'+esc(x)+'</span>')).join(' ');
-  /* ============ 複製：一律「在指令框上連點兩下」 ============
-     text 可為函式：連點的當下才計算（時戳才會準） */
-  function bindCmdCopy(cmdEl, text, mode){
+  /* ============ 產生即記錄 ============
+     只要工具「產生」出任何有效指令，就記錄到 Google Sheet，
+     不論使用者是否複製、不論模式一/二/未來新模式。
+     - 防抖 1.2s：等指令內容穩定後才記一次，避免打字/拖曳過程的半成品
+     - 去重：同一條指令（含當下時戳展開後）不重覆記錄
+     - 每條指令仍可在指令框上「連點兩下」複製（複製不再另外記錄，避免重覆） */
+  const loggedSet = new Set();          // 本次工作階段已記錄過的指令
+  let genTimer=null;
+
+  function recordCommands(cmds, mode){
+    clearTimeout(genTimer);
+    const list=(Array.isArray(cmds)?cmds:[cmds]).filter(Boolean);
+    if(!list.length) return;
+    genTimer=setTimeout(()=>{
+      // 對含時戳的指令，展開時戳後再記錄（reMode2 傳函式）
+      const finalList=list.map(c=>typeof c==='function'?c():c).filter(Boolean);
+      finalList.forEach(cmd=>{
+        if(loggedSet.has(cmd)) return;   // 同一條只記一次
+        loggedSet.add(cmd);
+        logToSheet(mode||'-', cmd);
+      });
+    }, 1200);
+  }
+
+  /* 指令框連點兩下 → 只複製，不再另記（產生時已記錄） */
+  function bindCmdCopy(cmdEl, text){
     if(!cmdEl) return;
     cmdEl.addEventListener('dblclick', ()=>{
       const out = (typeof text==='function') ? text() : text;
       if(!out) return;
       copy(out, '已複製');
-      logToSheet(mode||'-', out);
       cmdEl.classList.add('copied');
       setTimeout(()=>cmdEl.classList.remove('copied'), 900);
       const sel=window.getSelection && window.getSelection();
-      if(sel) sel.removeAllRanges();     // 清掉連點造成的反白
+      if(sel) sel.removeAllRanges();
     });
   }
 
@@ -714,6 +736,7 @@ Banned Tag 更新通知
     $('#input').value='';
     $('#target').value='';
     zones.add=[]; zones.rm=[];
+    loggedSet.clear(); clearTimeout(genTimer);
     store(LS.target,'');
     renderM1(); renderM2();
     // 回到模式一
@@ -833,12 +856,14 @@ Banned Tag 更新通知
             :'<div class="warn"><span>⚠️</span><span>此筆未偵測到成功的 Tag，未產生指令。</span></div>')+
         (it.failed.length?'<div class="warn"><span>⚠️</span><span>已排除未成功的 Tag：'+it.failed.map(esc).join('、')+'</span></div>':'');
       box.appendChild(card);
-      if(has)bindCmdCopy(card.querySelector('.cmd'), cmd, '模式一 · n8n alert');
+      if(has)bindCmdCopy(card.querySelector('.cmd'), cmd);
     });
+    // 產生即記錄：本次解析出的所有有效指令
+    if(all.length) recordCommands(all, all.length>1?'模式一 · n8n alert（批次）':'模式一 · n8n alert');
+
     if(all.length>1){ca.style.display='flex';ca.innerHTML=COPY_SVG+'複製全部';
       ca.onclick=()=>{
         copy(all.join('\n'),all.length+' 筆指令已複製');
-        all.forEach(c=>logToSheet('模式一 · n8n alert（批次）', c));
         ca.classList.add('done');setTimeout(()=>ca.classList.remove('done'),1400);
       };
     }else ca.style.display='none';
@@ -929,9 +954,10 @@ Banned Tag 更新通知
       (hasTs ? '<div class="warn"><span>⏱</span><span>已自動附上 <b>+6 小時</b> 的 Unix 時戳（'+
                new Date((nowTs()+TS_OFFSET)*1000).toLocaleString('zh-TW')+' 到期）。時戳會在你按下複製的當下重新計算。</span></div>' : '');
 
-    // 傳函式：連點兩下的當下才計算時戳，確保與複製時間一致
+    // 傳函式：連點/記錄的當下才計算時戳
     const getCmd=()=>buildCmd(target, zones.add.map(expandTag), zones.rm);
-    bindCmdCopy(out.querySelector('.cmd'), getCmd, '模式二 · 手動組指令');
+    bindCmdCopy(out.querySelector('.cmd'), getCmd);
+    recordCommands(getCmd, '模式二 · 手動組指令');   // 產生即記錄
   }
 
   /* 拖放：兩個區塊互拖 + 拖回標籤庫 */
