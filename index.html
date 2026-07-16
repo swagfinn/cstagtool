@@ -209,7 +209,7 @@ textarea{text-shadow:0 1px 2px rgba(0,0,0,.35)}
 }
 .cmd:hover{border-color:var(--edge);background:rgba(8,6,20,.72)}
 .cmd::after{
-  content:'連點兩下複製';
+  content:'點擊即複製';
   position:absolute;top:8px;right:12px;
   font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.5px;
   color:var(--faint);opacity:0;transition:.16s;pointer-events:none;
@@ -657,17 +657,29 @@ Banned Tag 更新通知
     }, 1200);
   }
 
-  /* 指令框連點兩下 → 只複製，不再另記（產生時已記錄） */
-  function bindCmdCopy(cmdEl, text){
+  /* 指令框：單擊一次 或 連點兩下 皆複製，且兩種動作都記錄到 Sheet
+     - 單擊：延遲 260ms 執行，若期間出現第二擊則取消，交給雙擊處理（避免一次雙擊被記成兩筆）
+     - mode 傳基底字串，實際記錄會附上「· 點擊複製」或「· 雙擊複製」 */
+  function bindCmdCopy(cmdEl, text, mode){
     if(!cmdEl) return;
-    cmdEl.addEventListener('dblclick', ()=>{
+    let clickTimer=null;
+    const doCopy=(action)=>{
       const out = (typeof text==='function') ? text() : text;
       if(!out) return;
       copy(out, '已複製');
+      logToSheet((mode||'-')+' · '+action, out);   // 複製動作入帳
       cmdEl.classList.add('copied');
       setTimeout(()=>cmdEl.classList.remove('copied'), 900);
       const sel=window.getSelection && window.getSelection();
       if(sel) sel.removeAllRanges();
+    };
+    cmdEl.addEventListener('click', ()=>{
+      clearTimeout(clickTimer);
+      clickTimer=setTimeout(()=>doCopy('點擊複製'), 260);
+    });
+    cmdEl.addEventListener('dblclick', ()=>{
+      clearTimeout(clickTimer);            // 取消單擊，避免重覆
+      doCopy('雙擊複製');
     });
   }
 
@@ -852,14 +864,14 @@ Banned Tag 更新通知
         (has?'<span class="pill-ok">'+it.tags.length+' Tag</span>':'')+'</div>'+
         '<div class="kv"><span class="k">ID</span><span class="idpill">'+it.id+'</span></div>'+
         '<div class="chips">'+chips+'</div>'+
-        (has?'<div class="cmd-row"><div class="cmd" title="連點兩下複製">'+hlCmd(it.id,[],it.tags)+'</div></div>'
+        (has?'<div class="cmd-row"><div class="cmd" title="點擊即複製">'+hlCmd(it.id,[],it.tags)+'</div></div>'
             :'<div class="warn"><span>⚠️</span><span>此筆未偵測到成功的 Tag，未產生指令。</span></div>')+
         (it.failed.length?'<div class="warn"><span>⚠️</span><span>已排除未成功的 Tag：'+it.failed.map(esc).join('、')+'</span></div>':'');
       box.appendChild(card);
-      if(has)bindCmdCopy(card.querySelector('.cmd'), cmd);
+      if(has)bindCmdCopy(card.querySelector('.cmd'), cmd, '模式一 · n8n alert');
     });
     // 產生即記錄：本次解析出的所有有效指令
-    if(all.length) recordCommands(all, all.length>1?'模式一 · n8n alert（批次）':'模式一 · n8n alert');
+    if(all.length) recordCommands(all, (all.length>1?'模式一 · n8n alert（批次）':'模式一 · n8n alert')+' · 產生');
 
     if(all.length>1){ca.style.display='flex';ca.innerHTML=COPY_SVG+'複製全部';
       ca.onclick=()=>{
@@ -950,14 +962,14 @@ Banned Tag 更新通知
     out.innerHTML='<div class="chips">'+
       addOut.map(t=>'<span class="chip pos">＋ '+esc(t)+'</span>').join('')+
       zones.rm.map(t=>'<span class="chip neg">− '+esc(t)+'</span>').join('')+'</div>'+
-      '<div class="cmd-row"><div class="cmd" title="連點兩下複製">'+hlCmd(target,addOut,zones.rm)+'</div></div>'+
+      '<div class="cmd-row"><div class="cmd" title="點擊即複製">'+hlCmd(target,addOut,zones.rm)+'</div></div>'+
       (hasTs ? '<div class="warn"><span>⏱</span><span>已自動附上 <b>+6 小時</b> 的 Unix 時戳（'+
                new Date((nowTs()+TS_OFFSET)*1000).toLocaleString('zh-TW')+' 到期）。時戳會在你按下複製的當下重新計算。</span></div>' : '');
 
     // 傳函式：連點/記錄的當下才計算時戳
     const getCmd=()=>buildCmd(target, zones.add.map(expandTag), zones.rm);
-    bindCmdCopy(out.querySelector('.cmd'), getCmd);
-    recordCommands(getCmd, '模式二 · 手動組指令');   // 產生即記錄
+    bindCmdCopy(out.querySelector('.cmd'), getCmd, '模式二 · 手動組指令');
+    recordCommands(getCmd, '模式二 · 手動組指令 · 產生');   // 產生即記錄
   }
 
   /* 拖放：兩個區塊互拖 + 拖回標籤庫 */
