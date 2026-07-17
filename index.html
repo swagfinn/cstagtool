@@ -265,15 +265,15 @@ textarea{text-shadow:0 1px 2px rgba(0,0,0,.35)}
 }
 .target-hero .lbl .hint{font-size:11.5px;font-weight:400;color:var(--faint);letter-spacing:0}
 .target-wrap{position:relative;display:flex;align-items:center}
-#target{
+#target,#msgid{
   width:100%;font-family:var(--mono);font-size:17px;font-weight:700;color:#fff;letter-spacing:.4px;
   background:var(--well);border:2px solid var(--edge);border-radius:15px;
   padding:16px;outline:none;transition:.18s;
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   box-shadow:inset 0 2px 8px rgba(0,0,0,.14);
 }
-#target:focus{border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.22), inset 0 2px 8px rgba(0,0,0,.14)}
-#target::placeholder{color:rgba(255,255,255,.55);font-weight:500;letter-spacing:.3px}
+#target:focus,#msgid:focus{border-color:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.22), inset 0 2px 8px rgba(0,0,0,.14)}
+#target::placeholder,#msgid::placeholder{color:rgba(255,255,255,.55);font-weight:500;letter-spacing:.3px}
 
 .zones{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px}
 @media(max-width:640px){.zones{grid-template-columns:1fr}}
@@ -343,12 +343,12 @@ textarea{text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .ptag .del:hover{background:var(--neg);color:#6E2418}
 
 .addtag{display:flex;gap:9px;margin-top:14px}
-#newTag{
+#newTag,#newTag3{
   flex:1;font-family:var(--mono);font-size:14px;color:#fff;background:var(--well);
   border:1px solid var(--edge-soft);border-radius:12px;padding:11px 14px;outline:none;transition:.15s;
 }
-#newTag:focus{border-color:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.18)}
-#newTag::placeholder{color:var(--faint)}
+#newTag:focus,#newTag3:focus{border-color:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.18)}
+#newTag::placeholder,#newTag3::placeholder{color:var(--faint)}
 .addtag button{
   flex:0 0 auto;width:52px;cursor:pointer;color:#2A1D4A;background:rgba(255,255,255,.88);
   border:1px solid #fff;border-radius:12px;padding:0;transition:.15s;
@@ -465,6 +465,7 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" aria-selected="true" data-view="v1"><span>🚨</span><span>n8n alert 自動封鎖通知</span><span class="no">M1</span></button>
         <button class="tab" role="tab" aria-selected="false" data-view="v2"><span>🤖</span><span>Tag新增 / 移除</span><span class="no">M2</span></button>
+        <button class="tab" role="tab" aria-selected="false" data-view="v3"><span>💬</span><span>Message Tag</span><span class="no">M3</span></button>
       </div>
     </div>
   </header>
@@ -536,9 +537,47 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
     </div>
   </section>
 
-  <footer>
-  <div style="display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap">
-    <span>送出前請再看一眼 ID 與 Tag · 內部效率工具</span>
+  <!-- ========== 模式三：Message Tag ========== -->
+  <section class="view" id="v3">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Message 標籤</div>
+        <button class="btn" id="resetM3">全部清空</button>
+      </div>
+
+      <div class="target-hero">
+        <div class="lbl">💬 Message ID <span class="hint">指令要作用的貼文</span></div>
+        <div class="target-wrap">
+          <input type="text" id="msgid" placeholder="MID1 MID2 MID3..." spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="zones">
+        <div class="zone add" id="zoneAdd3" data-zone="add">
+          <div class="zone-head"><span>新增</span><span class="cnt" id="cntAdd3">0</span></div>
+          <div class="zone-body" id="bodyAdd3"></div>
+        </div>
+        <div class="zone rm" id="zoneRm3" data-zone="rm">
+          <div class="zone-head"><span>移除</span><span class="cnt" id="cntRm3">0</span></div>
+          <div class="zone-body" id="bodyRm3"></div>
+        </div>
+      </div>
+
+      <div class="palette">
+        <div class="lbl">標籤庫 <span class="hint">依使用次數由多到少排序 · 拖曳標籤到上方框內</span></div>
+        <div class="pal-grid" id="palette3"></div>
+        <div class="addtag">
+          <input type="text" id="newTag3" placeholder="自訂新標籤…可用空格分隔一次新增多個" spellcheck="false" autocomplete="off">
+          <button id="addTagBtn3" title="新增標籤（可用空格分隔一次多筆）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">產生的指令</div></div>
+      <div class="out2" id="out3"></div>
+    </div>
+  </section>
     <span class="me" id="me"></span>
     <span class="me"><button id="pingBtn">測試記錄連線</button></span>
   </div>
@@ -553,7 +592,8 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
   const AT='@', BOT='bot-allan';
   const TAGCHARS='[A-Za-z0-9_\\-\\u4e00-\\u9fff]+';
   const LS={tags:'tagtool.palette.v2', counts:'tagtool.counts.v1', target:'tagtool.target.v1',
-            g:'tagtool.grad.v1', email:'tagtool.email.v1', act:'tagtool.lastactive.v1'};
+            g:'tagtool.grad.v1', email:'tagtool.email.v1', act:'tagtool.lastactive.v1',
+            tags3:'tagtool.palette3.v1', counts3:'tagtool.counts3.v1'};
 
   /* 閒置自動登出：超過 5 小時無操作即回到驗證頁 */
   const IDLE_MS = 5*60*60*1000;   // 5 小時
@@ -630,8 +670,8 @@ Banned Tag 更新通知
   const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
   const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
 
-  const buildCmd=(t,add,rm)=>AT+BOT+' utag '+t+'/'+add.concat(rm.map(x=>'-'+x)).join(' ');
-  const hlCmd=(t,add,rm)=>'<span class="at">'+AT+'</span>'+BOT+' utag <span class="id">'+esc(t)+'</span><span class="slash">/</span>'+
+  const buildCmd=(t,add,rm,verb)=>AT+BOT+' '+(verb||'utag')+' '+t+'/'+add.concat(rm.map(x=>'-'+x)).join(' ');
+  const hlCmd=(t,add,rm,verb)=>'<span class="at">'+AT+'</span>'+BOT+' '+(verb||'utag')+' <span class="id">'+esc(t)+'</span><span class="slash">/</span>'+
     add.map(x=>'<span class="plus">'+esc(x)+'</span>').concat(rm.map(x=>'<span class="minus">-'+esc(x)+'</span>')).join(' ');
   /* ============ 產生即記錄 ============
      只要工具「產生」出任何有效指令，就記錄到 Google Sheet，
@@ -748,9 +788,10 @@ Banned Tag 更新通知
     $('#input').value='';
     $('#target').value='';
     zones.add=[]; zones.rm=[];
+    m3.add=[]; m3.rm=[]; m3.applied=''; $('#msgid').value='';
     loggedSet.clear(); clearTimeout(genTimer);
     store(LS.target,'');
-    renderM1(); renderM2();
+    renderM1(); renderM2(); renderM3();
     // 回到模式一
     document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.view==='v1')));
     document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id==='v1'));
@@ -986,6 +1027,125 @@ Banned Tag 更新通知
   pal.addEventListener('drop',e=>{e.preventDefault();pal.classList.remove('over');
     const t=e.dataTransfer.getData('text/plain');if(t)pullTag(t);});
 
+  /* ================= 模式三：Message Tag（mtag） ================= */
+  const M3_SEED = ['hidden:seo','hidden:search','hidden:feed','banned:post:unlock','hidden','duplicate'];
+  const M3_DEFAULT_ADD = ['hidden:seo','hidden:search','hidden:feed','banned:post:unlock'];
+  const M3_DEFAULT_RM  = ['hidden'];
+
+  let m3Palette = load(LS.tags3, M3_SEED.slice());
+  let m3Counts  = load(LS.counts3, {});
+  (function mergeM3(){                       // 舊使用者補上預設標籤
+    let changed=false;
+    M3_SEED.forEach(t=>{ if(!m3Palette.includes(t)){ m3Palette.push(t); changed=true; } });
+    if(changed) store(LS.tags3, m3Palette);
+  })();
+
+  const m3 = {add:[], rm:[], applied:''};   // applied = 已套過預設的 message id
+
+  function m3Sorted(){
+    return m3Palette.map((t,i)=>({t,i,c:m3Counts[t]||0}))
+                    .sort((a,b)=> b.c-a.c || a.i-b.i).map(o=>o.t);
+  }
+  function m3Bump(tag){ m3Counts[tag]=(m3Counts[tag]||0)+1; store(LS.counts3,m3Counts); }
+
+  function m3Put(tag,to){
+    const other=to==='add'?'rm':'add';
+    const moved=m3[other].includes(tag);
+    m3[other]=m3[other].filter(t=>t!==tag);
+    if(!m3[to].includes(tag)){ m3[to].push(tag); if(!moved) m3Bump(tag); }
+    renderM3();
+  }
+  function m3Pull(tag){
+    m3.add=m3.add.filter(t=>t!==tag);
+    m3.rm =m3.rm.filter(t=>t!==tag);
+    renderM3();
+  }
+  function renderM3Palette(){
+    const g=$('#palette3');
+    g.innerHTML=m3Sorted().map(t=>{
+      const used=m3.add.includes(t)||m3.rm.includes(t);
+      return '<div class="ptag'+(used?' used':'')+'" draggable="true" data-tag="'+esc(t)+'" title="拖曳到「新增」或「移除」">'+
+        esc(t)+'<span class="del" title="從標籤庫刪除">×</span></div>';
+    }).join('');
+    g.querySelectorAll('.ptag').forEach(el=>{
+      const tag=el.dataset.tag;
+      el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',tag);e.dataTransfer.effectAllowed='copyMove';el.classList.add('dragging');});
+      el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+      el.querySelector('.del').onclick=e=>{
+        e.stopPropagation();
+        m3Palette=m3Palette.filter(x=>x!==tag);store(LS.tags3,m3Palette);
+        m3.add=m3.add.filter(x=>x!==tag);m3.rm=m3.rm.filter(x=>x!==tag);
+        renderM3();toast('已從標籤庫刪除');
+      };
+    });
+  }
+  function renderM3Zone(k){
+    const body=k==='add'?$('#bodyAdd3'):$('#bodyRm3');
+    (k==='add'?$('#cntAdd3'):$('#cntRm3')).textContent=m3[k].length;
+    if(!m3[k].length){
+      body.innerHTML='<div class="zone-empty">把標籤拖到這裡<br>'+(k==='add'?'（指令不加前綴）':'（指令加上 − 前綴）')+'</div>';
+      return;
+    }
+    body.innerHTML=m3[k].map(t=>'<span class="dtag" draggable="true" data-tag="'+esc(t)+'" title="點一下移回標籤庫">'+esc(t)+'<span class="x">×</span></span>').join('');
+    body.querySelectorAll('.dtag').forEach(el=>{
+      const tag=el.dataset.tag;
+      el.onclick=()=>m3Pull(tag);
+      el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',tag);e.dataTransfer.effectAllowed='move';el.classList.add('dragging');});
+      el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    });
+  }
+  function renderM3(){
+    renderM3Zone('add');renderM3Zone('rm');renderM3Palette();
+    const id=$('#msgid').value.trim();
+    const out=$('#out3'), has=m3.add.length||m3.rm.length;
+    if(!id&&!has){out.innerHTML='<div class="empty"><span class="em">💬</span><p>貼上 Message ID，<br>會自動套用預設標籤</p></div>';clearTimeout(genTimer);return;}
+    if(!id){out.innerHTML='<div class="warn"><span>⚠️</span><span>還差 <b>Message ID</b>，貼上就會產生指令。</span></div>';clearTimeout(genTimer);return;}
+    if(!has){out.innerHTML='<div class="warn"><span>⚠️</span><span>還沒有任何 Tag，請從下方標籤庫拖曳加入。</span></div>';clearTimeout(genTimer);return;}
+    const cmd=buildCmd(id,m3.add,m3.rm,'mtag');
+    out.innerHTML='<div class="chips">'+
+      m3.add.map(t=>'<span class="chip pos">＋ '+esc(t)+'</span>').join('')+
+      m3.rm.map(t=>'<span class="chip neg">− '+esc(t)+'</span>').join('')+'</div>'+
+      '<div class="cmd-row"><div class="cmd" title="點擊即複製">'+hlCmd(id,m3.add,m3.rm,'mtag')+'</div></div>';
+    bindCmdCopy(out.querySelector('.cmd'), cmd, '模式三 · Message Tag');
+    recordCommands(cmd, '模式三 · Message Tag · 產生');
+  }
+  // 貼上 message id → 若尚未套過預設，自動選定
+  function m3MaybeApplyDefault(){
+    const id=$('#msgid').value.trim();
+    if(id && m3.applied!==id && m3.add.length===0 && m3.rm.length===0){
+      m3.add=M3_DEFAULT_ADD.slice();
+      m3.rm =M3_DEFAULT_RM.slice();
+      m3.applied=id;
+    }
+    renderM3();
+  }
+  $('#msgid').addEventListener('input', m3MaybeApplyDefault);
+  ['zoneAdd3','zoneRm3'].forEach(id=>{
+    const z=document.getElementById(id),k=z.dataset.zone;
+    z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
+    z.addEventListener('dragleave',e=>{if(!z.contains(e.relatedTarget))z.classList.remove('over');});
+    z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');
+      const t=e.dataTransfer.getData('text/plain');if(t)m3Put(t,k);});
+  });
+  const pal3=$('#palette3');
+  pal3.addEventListener('dragover',e=>{e.preventDefault();pal3.classList.add('over');});
+  pal3.addEventListener('dragleave',e=>{if(!pal3.contains(e.relatedTarget))pal3.classList.remove('over');});
+  pal3.addEventListener('drop',e=>{e.preventDefault();pal3.classList.remove('over');
+    const t=e.dataTransfer.getData('text/plain');if(t)m3Pull(t);});
+  function m3AddNewTag(){
+    const i=$('#newTag3');
+    const list=i.value.split(/[\s,，、]+/).map(x=>x.trim().replace(/[`*"']/g,'')).filter(Boolean);
+    if(!list.length)return;
+    let n=0; list.forEach(v=>{ if(!m3Palette.includes(v)){m3Palette.push(v);n++;} });
+    store(LS.tags3,m3Palette);
+    i.value=''; renderM3();
+    toast(n?('已加入 '+n+' 個標籤'):'標籤已存在');
+  }
+  $('#addTagBtn3').onclick=m3AddNewTag;
+  $('#newTag3').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();m3AddNewTag();}});
+  $('#resetM3').onclick=()=>{m3.add=[];m3.rm=[];m3.applied='';$('#msgid').value='';renderM3();toast('已清空');};
+
+
   /* ================= 三寶連結 ================= */
   $('#refGrid').innerHTML=REFS.map((r,i)=>
     '<a class="ref" href="'+r.u+'" target="_blank" rel="noopener">'+
@@ -1071,7 +1231,7 @@ Banned Tag 更新通知
   setHC(load('tagtool.hc.v1',false));
 
   $('#target').value=load(LS.target,'')||'';
-  renderM1();renderM2();
+  renderM1();renderM2();renderM3();
 })();
 </script>
 </body>
