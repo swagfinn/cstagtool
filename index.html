@@ -596,7 +596,8 @@ footer{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;tex
             tags3:'tagtool.palette3.v1', counts3:'tagtool.counts3.v1'};
 
   /* 閒置自動登出：超過 5 小時無操作即回到驗證頁 */
-  const IDLE_MS = 5*60*60*1000;   // 5 小時
+  const IDLE_MS    = 22*60*60*1000;  // 閒置 22 小時 → 自動登出
+  const REFRESH_MS = 6*60*60*1000;   // 閒置 6 小時  → 自動 F5 重整
 
   /* ============================================================
      ⚙️ 設定：把 Google Apps Script 部署後的 Web App 網址貼在這裡
@@ -816,7 +817,7 @@ Banned Tag 更新通知
     openGate();
     if(idle){
       const msg=$('#gateMsg');
-      msg.textContent='閒置超過 5 小時，已自動登出，請重新驗證';
+      msg.textContent='閒置超過 22 小時，已自動登出，請重新驗證';
       msg.classList.add('on');
     }
   }
@@ -831,7 +832,12 @@ Banned Tag 更新通知
   }
   function checkIdle(){
     if(!USER_EMAIL) return;
-    if(Date.now()-lastAct > IDLE_MS) logout(true);
+    const idle = Date.now()-lastAct;
+    if(idle > IDLE_MS){ logout(true); return; }   // 22h → 登出
+    if(idle > REFRESH_MS){                          // 6h → 重整
+      lastAct=Date.now(); store(LS.act,lastAct);    // 先蓋新時戳，避免重整後又立刻觸發
+      location.reload();
+    }
   }
   ['mousedown','keydown','wheel','touchstart','scroll','dragstart'].forEach(ev=>{
     window.addEventListener(ev, touchActivity, {passive:true});
@@ -1221,7 +1227,7 @@ Banned Tag 更新通知
     needsReset=true;                     // 逾時後重新開頁 → 登入時初始化
     openGate();
     const msg=$('#gateMsg');
-    msg.textContent='閒置超過 5 小時，已自動登出，請重新驗證';
+    msg.textContent='閒置超過 22 小時，已自動登出，請重新驗證';
     msg.classList.add('on');
   }else{
     openGate();
